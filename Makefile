@@ -9,13 +9,13 @@ target/.dep_flag: target/.flag
 	touch target/.dep_flag
 
 target/server: target/.flag Makefile $(FILES)
-	go build -race -o target/server src/server.go
+	go build -o target/server src/server.go
 
 target/console: target/.flag Makefile $(FILES)
-	go build -race -o target/console src/console.go
+	go build -o target/console src/console.go
 
 target/menu: target/.flag Makefile $(FILES)
-	go build -race -o target/menu src/menu.go
+	go build -o target/menu src/menu.go
 
 target/.flag:
 	mkdir -p target
