@@ -7,7 +7,7 @@ import (
 )
 
 import (
-	"rc"
+	"gate/core/rc"
 )
 
 func main() {
