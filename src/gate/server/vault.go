@@ -15,21 +15,21 @@ import (
 	"strconv"
 )
 
-type key struct {
-	name string
-	pass string
-	delcount int64
-	addcount int64
+type Vault interface {
+	Open(master string, config core.Config) (err error)
+	Item(name string) (result Key, err error)
 }
 
-type Vault struct {
-	Data map[string]*key
+type vault struct {
+	data map[string]*key
 	in func() (io.Reader, error)
 }
 
-func NewVault(in func() (io.Reader, error)) (result *Vault) {
-	result = &Vault{
-		Data: make(map[string]*key),
+var _ Vault = &vault{}
+
+func NewVault(in func() (io.Reader, error)) (result Vault) {
+	result = &vault{
+		data: make(map[string]*key),
 		in: in,
 	}
 	return
@@ -50,7 +50,7 @@ func decode_group_int(data string, name string, match []int) (result int64, err 
 	return
 }
 
-func (self *Vault) decode(out io.Reader, errs chan error) {
+func (self *vault) decode(out io.Reader, errs chan error) {
 	buffer := &bytes.Buffer{}
 	for done := false; !done; {
 		_, err := buffer.ReadFrom(out)
@@ -77,19 +77,23 @@ func (self *Vault) decode(out io.Reader, errs chan error) {
 			delcount: delcount,
 			addcount: addcount,
 		}
-		self.Data[name] = k
+		self.data[name] = k
 	}
 
 	errs <- io.EOF
 }
 
-func (self *Vault) Open(master string, config *core.Config) (err error) {
+func (self *vault) Open(master string, config core.Config) (err error) {
 	instream, err := self.in()
 	if err != nil {
 		return errors.Decorated(err)
 	}
 
-	cmd := exec.Command("openssl", config.Value("vault", "", "openssl.cipher"), "-d", "-a", "-pass", "env:VAULT_MASTER")
+	cipher, err := config.Eval("", "vault", "openssl.cipher")
+	if err != nil {
+		return
+	}
+	cmd := exec.Command("openssl", cipher, "-d", "-a", "-pass", "env:VAULT_MASTER")
 	cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", master))
 	cmd.Stdin = instream
 
@@ -117,5 +121,13 @@ func (self *Vault) Open(master string, config *core.Config) (err error) {
 		return errors.Decorated(err)
 	}
 
+	return
+}
+
+func (self *vault) Item(name string) (result Key, err error) {
+	result, ok := self.data[name]
+	if !ok {
+		err = errors.Newf("Unknown key: %s", name)
+	}
 	return
 }

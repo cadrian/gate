@@ -26,6 +26,10 @@ func NewConfig() (result Config, err error) {
 }
 
 func (self *config) findFile(file string) (result *rc.File, err error) {
+	if file == "" {
+		file = "config.rc"
+	}
+
 	result, ok := self.files[file]
 	if ok {
 		return
