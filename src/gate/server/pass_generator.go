@@ -25,30 +25,38 @@ import (
 	"os"
 )
 
+type Generator interface {
+	New() (result string, err error)
+}
+
 type generator struct {
 	recipe []generator_mix
 	length int
 }
+
+var _ Generator = &generator{}
 
 type generator_mix struct {
 	quantity int
 	ingredient string
 }
 
-func (self *generator) generated() (result string, err error) {
+func (self *generator) New() (result string, err error) {
 	in, err := os.Open("/dev/random")
 	if err != nil {
 		return "", errors.Decorated(err)
 	}
 	defer in.Close()
+	return self.generated(in)
+}
 
+func (self *generator) generated(in io.Reader) (result string, err error) {
 	for _, mix := range self.recipe {
 		result, err = mix.extend(in, result)
 		if err != nil {
 			return
 		}
 	}
-
 	return
 }
 
@@ -89,7 +97,7 @@ type parse_generator_context struct {
 	source string
 }
 
-func parse_generator(source string) (result *generator, err error) {
+func NewGenerator(source string) (result Generator, err error) {
 	context := &parse_generator_context{
 		recipe: make([]generator_mix, 0, 128),
 		total_quantity: 0,
@@ -122,6 +130,9 @@ func (self *parse_generator_context) parse_mix() (err error) {
 	if err != nil {
 		return
 	}
+	if self.last_quantity == 0 {
+		self.last_quantity = 1
+	}
 	self.recipe = append(
 		self.recipe,
 		generator_mix{
@@ -142,9 +153,6 @@ func (self *parse_generator_context) parse_quantity() (err error) {
 		default:
 			break
 		}
-	}
-	if self.last_quantity == 0 {
-		self.last_quantity = 1
 	}
 	return
 }
@@ -177,7 +185,11 @@ func (self *parse_generator_context) parse_ingredient() (err error) {
 		}
 	}
 	if err == nil && self.last_ingredient == "" {
-		return errors.Newf("expected ingredient at %d", self.index)
+		if self.last_quantity == 0 {
+			err = errors.Newf("expected ingredient or quantity at %d", self.index)
+		} else {
+			err = errors.Newf("expected ingredient at %d", self.index)
+		}
 	}
 	return
 }
