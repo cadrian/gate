@@ -42,12 +42,12 @@ type Vault interface {
 type vault struct {
 	data map[string]*key
 	open bool
-	in func() (io.Reader, error)
+	in func() (io.ReadCloser, error)
 }
 
 var _ Vault = &vault{}
 
-func NewVault(in func() (io.Reader, error)) (result Vault) {
+func NewVault(in func() (io.ReadCloser, error)) (result Vault) {
 	result = &vault{
 		data: make(map[string]*key),
 		in: in,
@@ -70,7 +70,7 @@ func decode_group_int(data string, name string, match []int) (result int64, err 
 	return
 }
 
-func (self *vault) decode(out io.Reader, errs chan error) {
+func (self *vault) decode(out io.ReadCloser, errs chan error) {
 	buffer := &bytes.Buffer{}
 	for done := false; !done; {
 		_, err := buffer.ReadFrom(out)
@@ -108,6 +108,7 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 	if err != nil {
 		return errors.Decorated(err)
 	}
+	defer instream.Close()
 
 	cipher, err := config.Eval("", "vault", "openssl.cipher")
 	if err != nil {

@@ -27,6 +27,7 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
+	"os"
 )
 
 type Server interface {
@@ -43,7 +44,20 @@ type server struct {
 
 var _ Server = &server{}
 
-func Start(config core.Config, in func() (io.Reader, error), port int) (result Server, err error) {
+func Start(config core.Config, port int) (result Server, err error) {
+	xdg, err := core.Xdg()
+	if err != nil {
+		return
+	}
+	data_home, err := xdg.DataHome()
+	if err != nil {
+		return
+	}
+	vault_path := fmt.Sprintf("%s/vault", data_home)
+	in := func() (result io.ReadCloser, err error) {
+		return os.Open(vault_path)
+	}
+
 	result = &server{
 		vault: NewVault(in),
 		config: config,
