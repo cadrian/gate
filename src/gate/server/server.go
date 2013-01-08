@@ -23,6 +23,7 @@ import (
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -42,9 +43,9 @@ type server struct {
 
 var _ Server = &server{}
 
-func Start(config core.Config, port int) (result Server, err error) {
+func Start(config core.Config, in func() (io.Reader, error), port int) (result Server, err error) {
 	result = &server{
-		vault: nil,
+		vault: NewVault(in),
 		config: config,
 	}
 	rpc.Register(result)
@@ -59,18 +60,19 @@ func Start(config core.Config, port int) (result Server, err error) {
 }
 
 func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
-	if self.vault != nil {
+	if self.vault.IsOpen() {
 		*reply = true
 		if thenClose {
 			err = self.vault.Close()
-			self.vault = nil
 		}
+	} else {
+		*reply = false
 	}
 	return
 }
 
 func (self *server) Get(name string, reply *string) (err error) {
-	if self.vault == nil {
+	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot retrieve %s", name)
 	}
 	key, err := self.vault.Item(name)
@@ -85,7 +87,7 @@ func (self *server) Get(name string, reply *string) (err error) {
 }
 
 func (self *server) List(filter string, reply *[]string) (err error) {
-	if self.vault == nil {
+	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot list")
 	}
 	*reply, err = self.vault.List(filter)
@@ -93,13 +95,9 @@ func (self *server) List(filter string, reply *[]string) (err error) {
 }
 
 func (self *server) Open(master string, reply *bool) (err error) {
-	if self.vault != nil {
+	if self.vault.IsOpen() {
 		return errors.Newf("Vault is already open: cannot open")
 	}
-	self.vault = NewVault()
 	err = self.vault.Open(master, self.config)
-	if err != nil {
-		self.vault = nil
-		return
-	}
+	return
 }

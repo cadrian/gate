@@ -33,13 +33,15 @@ import (
 
 type Vault interface {
 	Open(master string, config core.Config) error
-	Item(name string) (Key, error)
+	IsOpen() bool
 	Close() error
+	Item(name string) (Key, error)
 	List(filter string) ([]string, error)
 }
 
 type vault struct {
 	data map[string]*key
+	open bool
 	in func() (io.Reader, error)
 }
 
@@ -139,6 +141,17 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 		return errors.Decorated(err)
 	}
 
+	self.open = true
+	return
+}
+
+func (self *vault) IsOpen() bool {
+	return self.open
+}
+
+func (self *vault) Close() (err error) {
+	self.data = make(map[string]*key)
+	self.open = false
 	return
 }
 
@@ -164,10 +177,5 @@ func (self *vault) List(filter string) (result []string, err error) {
 		}
 	}
 	result = result[:len(result)]
-	return
-}
-
-func (self *vault) Close() (err error) {
-	self.data = make(map[string]*key)
 	return
 }
