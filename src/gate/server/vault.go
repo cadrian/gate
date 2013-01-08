@@ -32,8 +32,9 @@ import (
 )
 
 type Vault interface {
-	Open(master string, config core.Config) (err error)
-	Item(name string) (result Key, err error)
+	Open(master string, config core.Config) error
+	Item(name string) (Key, error)
+	Close() error
 }
 
 type vault struct {
@@ -145,5 +146,10 @@ func (self *vault) Item(name string) (result Key, err error) {
 	if !ok {
 		err = errors.Newf("Unknown key: %s", name)
 	}
+	return
+}
+
+func (self *vault) Close() (err error) {
+	self.data = make(map[string]*key)
 	return
 }
