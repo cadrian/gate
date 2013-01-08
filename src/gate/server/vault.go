@@ -35,6 +35,7 @@ type Vault interface {
 	Open(master string, config core.Config) error
 	Item(name string) (Key, error)
 	Close() error
+	List(filter string) ([]string, error)
 }
 
 type vault struct {
@@ -146,6 +147,23 @@ func (self *vault) Item(name string) (result Key, err error) {
 	if !ok {
 		err = errors.Newf("Unknown key: %s", name)
 	}
+	return
+}
+
+func (self *vault) List(filter string) (result []string, err error) {
+	re_filter, err := regexp.Compile(filter)
+	if err != nil {
+		err = errors.Decorated(err)
+		return
+	}
+
+	result = make([]string, 0, len(self.data))
+	for _, k := range self.data {
+		if !k.IsDeleted() && re_filter.MatchString(k.Name()) {
+			result = append(result, k.Name())
+		}
+	}
+	result = result[:len(result)]
 	return
 }
 

@@ -43,6 +43,9 @@ func (self *key) Name() string {
 }
 
 func (self *key) Password() string {
+	if self.IsDeleted() {
+		return ""
+	}
 	return self.pass
 }
 
