@@ -49,11 +49,13 @@ type Server interface {
 	List(filter string, reply *[]string) error
 	Merge(args MergeArgs, reply *bool) error
 	Save(force bool, reply *bool) error
+	Stop(status int, reply *bool) error
 }
 
 type server struct {
 	vault Vault
 	config core.Config
+	listener net.Listener
 }
 
 var _ Server = &server{}
@@ -78,18 +80,19 @@ func Start(config core.Config, port int) (result Server, err error) {
 		return
 	}
 	vault_path := fmt.Sprintf("%s/vault", data_home)
-	result = &server{
+	srv := &server{
 		vault: newVault(vault_path),
 		config: config,
 	}
-	rpc.Register(result)
+	rpc.Register(srv)
 	rpc.HandleHTTP()
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	srv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		err = errors.Decorated(err)
 		return
 	}
-	go http.Serve(listener, nil)
+	go http.Serve(srv.listener, nil)
+	result = srv
 	return
 }
 
@@ -185,5 +188,20 @@ func (self *server) Set(args SetArgs, reply *string) (err error) {
 		return
 	}
 	err = self.Get(args.Key, reply)
+	return
+}
+
+func (self *server) Stop(status int, reply *bool) (err error) {
+	if self.vault.IsOpen() {
+		err = self.vault.Close()
+		if err != nil {
+			return
+		}
+	}
+	err = self.listener.Close()
+	if err != nil {
+		return errors.Decorated(err)
+	}
+	*reply = true
 	return
 }

@@ -98,3 +98,11 @@ func (self *proxy) Set(args SetArgs, reply *string) (err error) {
 	}
 	return
 }
+
+func (self *proxy) Stop(status int, reply *bool) (err error) {
+	err = self.client.Call("Server.Stop", status, reply)
+	if err != nil {
+		err = errors.Decorated(err)
+	}
+	return
+}
