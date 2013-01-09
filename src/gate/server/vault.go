@@ -25,10 +25,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
+	"strings"
 )
 
 type In func() (io.ReadCloser, error)
@@ -69,14 +72,15 @@ func NewVault(in In, out Out) (result Vault) {
 	return
 }
 
-var decoder = regexp.MustCompile("^(?P<name>[^:]+):(?P<add>[0-9]+):(?P<del>[0-9]+):(?P<pass>.*)$")
+var decoder = regexp.MustCompile("(?P<name>[^:]+):(?P<add>[0-9]+):(?P<del>[0-9]+):(?P<pass>.*)")
 
-func decode_group(data string, name string, match []int) string {
-	return string(decoder.ExpandString(make([]byte, 0, 1024), "$" + name, data, match))
+func decode_group(data string, name string, match []int) (result string) {
+	result = string(decoder.ExpandString(make([]byte, 0, 1024), fmt.Sprintf("${%s}", name), data, match))
+	return
 }
 
 func decode_group_int(data string, name string, match []int) (result int64, err error) {
-	s := string(decoder.ExpandString(make([]byte, 0, 1024), "$"+name, data, match))
+	s := decode_group(data, name, match)
 	result, err = strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return 0, errors.Decorated(err)
@@ -93,27 +97,30 @@ func (self *vault) decode(out io.ReadCloser, barrier chan error) {
 	}
 	data := string(buffer.Bytes())
 
-	for _, linematch := range decoder.FindAllStringIndex(data, -1) {
-		name := decode_group(data, "name", linematch)
-		pass := decode_group(data, "pass", linematch)
-		delcount, err := decode_group_int(data, "del", linematch)
-		if err != nil {
-			barrier <- err
-			continue
-		}
-		addcount, err := decode_group_int(data, "add", linematch)
-		if err != nil {
-			barrier <- err
-			continue
-		}
+	for _, line := range strings.Split(data, "\n") {
+		if line != "" {
+			linematch := decoder.FindSubmatchIndex([]byte(line))
+			name := decode_group(line, "name", linematch)
+			pass := decode_group(line, "pass", linematch)
+			delcount, err := decode_group_int(line, "del", linematch)
+			if err != nil {
+				barrier <- err
+				continue
+			}
+			addcount, err := decode_group_int(line, "add", linematch)
+			if err != nil {
+				barrier <- err
+				continue
+			}
 
-		k := &key{
-			name: name,
-			pass: pass,
-			delcount: delcount,
-			addcount: addcount,
+			k := &key{
+				name: name,
+				pass: pass,
+				delcount: delcount,
+				addcount: addcount,
+			}
+			self.data[name] = k
 		}
-		self.data[name] = k
 	}
 
 	barrier <- io.EOF
@@ -191,11 +198,17 @@ func (self *vault) List(filter string) (result []string, err error) {
 
 	result = make([]string, 0, len(self.data))
 	for _, k := range self.data {
-		if !k.IsDeleted() && re_filter.MatchString(k.Name()) {
+		if k.IsDeleted() {
+			log.Printf("   # %s", k.Name())
+		} else if re_filter.MatchString(k.Name()) {
+			log.Printf("   + %s", k.Name())
 			result = append(result, k.Name())
+		} else {
+			log.Printf("   - %s", k.Name())
 		}
 	}
 	result = result[:len(result)]
+	sort.Strings(result)
 	return
 }
 
