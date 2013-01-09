@@ -1,0 +1,14 @@
+[connection]
+host = localhost
+port = 8532
+
+[password]
+command = yad
+arguments = --entry --hide-text --title=Password --text="$TEXT"
+
+[menu]
+command = yad
+arguments = --list --title=Gate --text=Gate --column=gate --separator= --width=300 --height=600 --regex-search --search-column=1
+
+[vault]
+openssl.cipher = bf
