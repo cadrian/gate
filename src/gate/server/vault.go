@@ -44,6 +44,7 @@ type Vault interface {
 	Save(force bool, config core.Config) error
 	SetRandom(name string, recipe string) error
 	SetPass(name string, pass string) error
+	Unset(name string) error
 }
 
 type vault struct {
@@ -277,6 +278,11 @@ func (self *vault) SetRandom(name string, recipe string) (err error) {
 		return
 	}
 	return self.SetPass(name, pass)
+}
+
+func (self *vault) Unset(name string) (err error) {
+	delete(self.data, name)
+	return
 }
 
 func (self *vault) SetPass(name string, pass string) (err error) {

@@ -46,6 +46,7 @@ type Server interface {
 	IsOpen(thenClose bool, reply *bool) error
 	Get(key string, reply *string) error
 	Set(args SetArgs, reply *string) error
+	Unset(key string, reply *bool) error
 	List(filter string, reply *[]string) error
 	Merge(args MergeArgs, reply *bool) error
 	Save(force bool, reply *bool) error
@@ -188,6 +189,15 @@ func (self *server) Set(args SetArgs, reply *string) (err error) {
 		return
 	}
 	err = self.Get(args.Key, reply)
+	return
+}
+
+func (self *server) Unset(key string, reply *bool) (err error) {
+	if !self.vault.IsOpen() {
+		return errors.Newf("Vault is not open: cannot unset")
+	}
+	err = self.vault.Unset(key)
+	*reply = err == nil
 	return
 }
 
