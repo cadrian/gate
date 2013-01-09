@@ -17,7 +17,27 @@
 package main
 
 import (
+	"gate/core"
+	"gate/server"
+)
+
+import (
+	"log"
+	"os"
 )
 
 func main() {
+	cfg, err := core.NewConfig()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	srv, err := server.Start(cfg, 8532)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	status, err := srv.Wait()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	os.Exit(status)
 }

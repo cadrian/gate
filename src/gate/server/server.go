@@ -28,6 +28,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"sync"
 )
 
 type MergeArgs struct {
@@ -53,13 +54,31 @@ type Server interface {
 	Stop(status int, reply *bool) error
 }
 
+type ServerLocal interface {
+	Server
+	Wait() (int, error)
+}
+
+type blockingHandler struct {
+	lock *sync.Mutex
+}
+
+func (self *blockingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	self.lock.Lock()
+	defer self.lock.Unlock()
+	http.DefaultServeMux.ServeHTTP(w, r)
+}
+
 type server struct {
 	vault Vault
 	config core.Config
 	listener net.Listener
+	handler *blockingHandler
+	running bool
+	status chan int
 }
 
-var _ Server = &server{}
+var _ ServerLocal = &server{}
 
 func newVault(file string) Vault {
 	in := func() (result io.ReadCloser, err error) {
@@ -71,7 +90,7 @@ func newVault(file string) Vault {
 	return NewVault(in, out)
 }
 
-func Start(config core.Config, port int) (result Server, err error) {
+func Start(config core.Config, port int) (result ServerLocal, err error) {
 	xdg, err := core.Xdg()
 	if err != nil {
 		return
@@ -84,6 +103,7 @@ func Start(config core.Config, port int) (result Server, err error) {
 	srv := &server{
 		vault: newVault(vault_path),
 		config: config,
+		status: make(chan int),
 	}
 	rpc.Register(srv)
 	rpc.HandleHTTP()
@@ -92,7 +112,13 @@ func Start(config core.Config, port int) (result Server, err error) {
 		err = errors.Decorated(err)
 		return
 	}
-	go http.Serve(srv.listener, nil)
+	srv.running = true
+
+	srv.handler = &blockingHandler{
+		lock: &sync.Mutex{},
+	}
+
+	go http.Serve(srv.listener, srv.handler)
 	result = srv
 	return
 }
@@ -212,6 +238,18 @@ func (self *server) Stop(status int, reply *bool) (err error) {
 	if err != nil {
 		return errors.Decorated(err)
 	}
+	self.running = false
+	self.status <- status
 	*reply = true
+	return
+}
+
+func (self *server) Wait() (result int, err error) {
+	if self.running {
+		result = <-self.status
+		self.handler.lock.Lock() // will never unlock, but the server is dead anyway (this barrier ensures that all connections are served)
+	} else {
+		err = errors.New("server not running")
+	}
 	return
 }
