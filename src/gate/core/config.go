@@ -21,13 +21,8 @@ import (
 	"gate/core/rc"
 )
 
-import (
-	"os"
-)
-
 type Config interface {
-	RawValue(file string, section string, key string) (string, error)
-	Eval(file string, section string, key string) (string, error)
+	Eval(file string, section string, key string, evaluator func(string) string) (string, error)
 }
 
 type config struct {
@@ -42,10 +37,6 @@ func NewConfig() (result Config, err error) {
 }
 
 func (self *config) findFile(file string) (result *rc.File, err error) {
-	if file == "" {
-		file = "config.rc"
-	}
-
 	result, ok := self.files[file]
 	if ok {
 		return
@@ -74,7 +65,7 @@ func (self *config) findFile(file string) (result *rc.File, err error) {
 	return
 }
 
-func (self *config) RawValue(file string, section string, key string) (result string, err error) {
+func (self *config) rawValue(file string, section string, key string) (result string, err error) {
 	f, err := self.findFile(file)
 	if err != nil {
 		return
@@ -232,28 +223,33 @@ func (self *eval_context) eval(env func(string) string, pb *rune) (next bool) {
 	return
 }
 
-func eval(raw string, env func(string) string) (result string) {
+func eval(raw string, evaluator func(string) string) (result string) {
 	ctx := &eval_context{
 		out : make([]rune, 0, 2 * len(raw)),
 	}
 	for _, b := range raw {
 		for next := false; !next; {
-			next = ctx.eval(env, &b)
+			next = ctx.eval(evaluator, &b)
 		}
 	}
 	for next := false; !next; {
-		next = ctx.eval(env, nil)
+		next = ctx.eval(evaluator, nil)
 	}
 
 	result = string(ctx.out)
 	return
 }
 
-func (self *config) Eval(file string, section string, key string) (result string, err error) {
-	raw, err := self.RawValue(file, section, key)
+func (self *config) Eval(file string, section string, key string, evaluator func(string) string) (result string, err error) {
+	if file == "" {
+		file = "config.rc"
+	}
+	result, err = self.rawValue(file, section, key)
 	if err != nil {
 		return
 	}
-	result = eval(raw, os.Getenv)
+	if evaluator != nil {
+		result = eval(result, evaluator)
+	}
 	return
 }

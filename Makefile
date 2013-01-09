@@ -27,7 +27,7 @@ target/.flag: Makefile
 	touch target/.flag
 
 clean:
-	rm -rf target
+	rm -rf bin pkg target
 
 .PHONY: all dep clean
 .SILENT:

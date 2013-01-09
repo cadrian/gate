@@ -87,7 +87,8 @@ func (self *FileContent) SkipWord() (result string, err error) {
 		case index > 0 && k >= '0' && k <= '9',
 			k >= 'A' && k <= 'Z',
 			k >= 'a' && k <= 'z',
-			k == '_':
+			k == '_',
+			k == '.':
 			return false
 		}
 		return true

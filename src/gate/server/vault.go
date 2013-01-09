@@ -84,24 +84,26 @@ func decode_group_int(data string, name string, match []int) (result int64, err 
 	return
 }
 
-func (self *vault) decode(out io.ReadCloser, errs chan error) {
-	buffer := &bytes.Buffer{}
-	for done := false; !done; {
-		_, err := buffer.ReadFrom(out)
-		done = err == io.EOF
+func (self *vault) decode(out io.ReadCloser, barrier chan error) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
+	_, err := buffer.ReadFrom(out)
+	if err != nil {
+		barrier <- err
+		return
 	}
 	data := string(buffer.Bytes())
+
 	for _, linematch := range decoder.FindAllStringIndex(data, -1) {
 		name := decode_group(data, "name", linematch)
 		pass := decode_group(data, "pass", linematch)
 		delcount, err := decode_group_int(data, "del", linematch)
 		if err != nil {
-			errs <- err
+			barrier <- err
 			continue
 		}
 		addcount, err := decode_group_int(data, "add", linematch)
 		if err != nil {
-			errs <- err
+			barrier <- err
 			continue
 		}
 
@@ -114,7 +116,7 @@ func (self *vault) decode(out io.ReadCloser, errs chan error) {
 		self.data[name] = k
 	}
 
-	errs <- io.EOF
+	barrier <- io.EOF
 }
 
 func (self *vault) Open(master string, config core.Config) (err error) {
@@ -124,10 +126,11 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 	}
 	defer instream.Close()
 
-	cipher, err := config.Eval("", "vault", "openssl.cipher")
+	cipher, err := config.Eval("", "vault", "openssl.cipher", os.Getenv)
 	if err != nil {
 		return
 	}
+
 	cmd := exec.Command("openssl", cipher, "-d", "-a", "-pass", "env:VAULT_MASTER")
 	cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", master))
 	cmd.Stdin = instream
@@ -136,17 +139,16 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 	if err != nil {
 		return errors.Decorated(err)
 	}
+
+	barrier := make(chan error)
+	go self.decode(out, barrier)
+
 	err = cmd.Start()
 	if err != nil {
 		return errors.Decorated(err)
 	}
 
-	errs := make(chan error)
-	go self.decode(out, errs)
-
-	for err == nil {
-		err = <-errs
-	}
+	err = <-barrier
 	if err != io.EOF {
 		return errors.Decorated(err)
 	}
@@ -222,7 +224,7 @@ func (self *vault) save(config core.Config) (err error) {
 	}
 	defer outstream.Close()
 
-	cipher, err := config.Eval("", "vault", "openssl.cipher")
+	cipher, err := config.Eval("", "vault", "openssl.cipher", os.Getenv)
 	if err != nil {
 		return err
 	}

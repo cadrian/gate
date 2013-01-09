@@ -23,6 +23,7 @@ import (
 )
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -54,7 +55,7 @@ func startServer() (err error) {
 		return errors.Decorated(err)
 	}
 
-	in.Write([]byte(fmt.Sprintf("%s/server\n", dirname())))
+	in.Write([]byte(fmt.Sprintf("%s/server > /tmp/server.log 2>&1\n", dirname())))
 
 	err = in.Close()
 	if err != nil {
@@ -72,6 +73,125 @@ func startServer() (err error) {
 	return
 }
 
+func readPassword(config core.Config, text string) (result string, err error) {
+	command, err := config.Eval("", "password", "command", os.Getenv)
+	if err != nil {
+		return
+	}
+	env := func (name string) string {
+		switch name {
+		case "TEXT":
+			return text
+		}
+		return ""
+	}
+	arguments, err := config.Eval("", "password", "arguments", env)
+	if err != nil {
+		return
+	}
+
+	buffer := &bytes.Buffer{}
+
+	type barrierData struct {
+		n int64
+		err error
+	}
+	barrier := make(chan barrierData)
+
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("%s %s", command, arguments))
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		return "", errors.Decorated(err)
+	}
+
+	go func() {
+		n, err := buffer.ReadFrom(out)
+		barrier <- barrierData{n, err}
+	}()
+
+	err = cmd.Start()
+	if err != nil {
+		return "", errors.Decorated(err)
+	}
+
+	data := <-barrier
+	if data.err != nil {
+		return "", errors.Decorated(err)
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		return "", errors.Decorated(err)
+	}
+
+	// the last character is a \n -- ignore it
+	return string(buffer.Bytes()[:data.n-1]), nil
+}
+
+func readNewMaster(config core.Config, reason string) (result string, err error) {
+	var pass1, pass2, text string
+
+	text = fmt.Sprintf("%s,\nplease enter an encryption phrase.", reason)
+	for result == "" {
+		pass1, err = readPassword(config, text)
+		if err != nil {
+			return
+		}
+		pass2, err = readPassword(config, "Please enter the same encryption phrase again.")
+		if err != nil {
+			return
+		}
+		if pass1 == pass2 {
+			result = pass1
+		} else {
+			text = fmt.Sprintf("Your phrases did not match.\n%s,\nplease enter an encryption phrase.", reason)
+		}
+	}
+
+	return
+}
+
+func openVault(srv server.Server, config core.Config) (err error) {
+	xdg, err := core.Xdg()
+	if err != nil {
+		return
+	}
+
+	data_home, err := xdg.DataHome()
+	if err != nil {
+		return
+	}
+	vault_path := fmt.Sprintf("%s/vault", data_home)
+	vault_info, err := os.Stat(vault_path)
+	if err != nil {
+		return errors.Decorated(err)
+	}
+
+	var master string
+	if vault_info == nil {
+		master, err = readNewMaster(config, "This is a new vault")
+		if err != nil {
+			return
+		}
+	} else {
+		master, err = readPassword(config, "Please enter your encryption phrase\nto open the password vault.")
+		if err != nil {
+			return
+		}
+	}
+
+	var isopen bool
+	err = srv.Open(master, &isopen)
+	if err != nil {
+		return
+	}
+	if !isopen {
+		return errors.New("Could not open vault")
+	}
+
+	return
+}
+
 func proxy(config core.Config) (result server.Server, err error) {
 	result = _proxy
 	if result == nil {
@@ -80,11 +200,11 @@ func proxy(config core.Config) (result server.Server, err error) {
 			port int64
 			s server.Server
 		)
-		host, err = config.Eval("", "connection", "host")
+		host, err = config.Eval("", "connection", "host", os.Getenv)
 		if err != nil {
 			return
 		}
-		p, err = config.Eval("", "connection", "port")
+		p, err = config.Eval("", "connection", "port", os.Getenv)
 		if err != nil {
 			return
 		}
@@ -104,6 +224,21 @@ func proxy(config core.Config) (result server.Server, err error) {
 				return
 			}
 		}
+
+		var isopen bool
+		err = s.IsOpen(false, &isopen)
+		if err != nil {
+			err = errors.Decorated(err)
+			return
+		}
+
+		if !isopen {
+			err = openVault(s, config)
+			if err != nil {
+				return
+			}
+		}
+
 		result = s
 		_proxy = result
 	}

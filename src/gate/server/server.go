@@ -170,6 +170,7 @@ func (self *server) Open(master string, reply *bool) (err error) {
 		return errors.Newf("Vault is already open: cannot open")
 	}
 	err = self.vault.Open(master, self.config)
+	*reply = err == nil
 	return
 }
 

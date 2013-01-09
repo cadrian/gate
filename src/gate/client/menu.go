@@ -23,15 +23,16 @@ import (
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 )
 
 func displayMenu(config core.Config, list []string) (err error) {
-	command, err := config.Eval("", "menu", "command")
+	command, err := config.Eval("", "menu", "command", os.Getenv)
 	if err != nil {
 		return
 	}
-	arguments, err := config.RawValue("", "menu", "arguments")
+	arguments, err := config.Eval("", "menu", "arguments", nil)
 	if err != nil {
 		return
 	}
