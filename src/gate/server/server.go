@@ -41,6 +41,7 @@ type Server interface {
 	Get(key string, reply *string) error
 	List(filter string, reply *[]string) error
 	Merge(args MergeArgs, reply *bool) error
+	Save(force bool, reply *bool) error
 }
 
 type server struct {
@@ -49,6 +50,16 @@ type server struct {
 }
 
 var _ Server = &server{}
+
+func newVault(file string) Vault {
+	in := func() (result io.ReadCloser, err error) {
+		return os.Open(file)
+	}
+	out := func() (result io.WriteCloser, err error) {
+		return os.Create(file)
+	}
+	return NewVault(in, out)
+}
 
 func Start(config core.Config, port int) (result Server, err error) {
 	xdg, err := core.Xdg()
@@ -60,12 +71,8 @@ func Start(config core.Config, port int) (result Server, err error) {
 		return
 	}
 	vault_path := fmt.Sprintf("%s/vault", data_home)
-	in := func() (result io.ReadCloser, err error) {
-		return os.Open(vault_path)
-	}
-
 	result = &server{
-		vault: NewVault(in),
+		vault: newVault(vault_path),
 		config: config,
 	}
 	rpc.Register(result)
@@ -126,10 +133,7 @@ func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot merge")
 	}
-	in := func () (result io.ReadCloser, err error) {
-		return os.Open(args.Vault)
-	}
-	vault := NewVault(in)
+	vault := newVault(args.Vault)
 	err = vault.Open(args.Master, self.config)
 	if err != nil {
 		return
@@ -145,5 +149,18 @@ func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
 	if err != nil {
 		return
 	}
+	*reply = true
+	return
+}
+
+func (self *server) Save(force bool, reply *bool) (err error) {
+	if !self.vault.IsOpen() {
+		return errors.Newf("Vault is not open: cannot save")
+	}
+	err = self.vault.Save(force, self.config)
+	if err != nil {
+		return
+	}
+	*reply = true
 	return
 }

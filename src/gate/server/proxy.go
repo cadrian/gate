@@ -82,3 +82,11 @@ func (self *proxy) Merge(args MergeArgs, reply *bool) (err error) {
 	}
 	return
 }
+
+func (self *proxy) Save(force bool, reply *bool) (err error) {
+	err = self.client.Call("Server.Save", force, reply)
+	if err != nil {
+		err = errors.Decorated(err)
+	}
+	return
+}

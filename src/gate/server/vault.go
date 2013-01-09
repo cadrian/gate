@@ -31,6 +31,9 @@ import (
 	"strconv"
 )
 
+type In func() (io.ReadCloser, error)
+type Out func() (io.WriteCloser, error)
+
 type Vault interface {
 	Open(master string, config core.Config) error
 	IsOpen() bool
@@ -38,21 +41,25 @@ type Vault interface {
 	Item(name string) (Key, error)
 	List(filter string) ([]string, error)
 	Merge(other Vault) error
+	Save(force bool, config core.Config) error
 }
 
 type vault struct {
 	data map[string]*key
-	open bool
 	dirty bool
-	in func() (io.ReadCloser, error)
+	in In
+	out Out
+	open bool
+	master string
 }
 
 var _ Vault = &vault{}
 
-func NewVault(in func() (io.ReadCloser, error)) (result Vault) {
+func NewVault(in In, out Out) (result Vault) {
 	result = &vault{
 		data: make(map[string]*key),
 		in: in,
+		out: out,
 	}
 	return
 }
@@ -144,6 +151,7 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 		return errors.Decorated(err)
 	}
 
+	self.master = master
 	self.open = true
 	return
 }
@@ -155,6 +163,7 @@ func (self *vault) IsOpen() bool {
 func (self *vault) Close() (err error) {
 	self.data = make(map[string]*key)
 	self.open = false
+	self.master = ""
 	return
 }
 
@@ -198,5 +207,50 @@ func (self *vault) Merge(o Vault) (err error) {
 		}
 	}
 	self.dirty = true
+	return
+}
+
+func (self *vault) save(config core.Config) (err error) {
+	outstream, err := self.out()
+	if err != nil {
+		return errors.Decorated(err)
+	}
+	defer outstream.Close()
+
+	cipher, err := config.Eval("", "vault", "openssl.cipher")
+	if err != nil {
+		return err
+	}
+
+	cmd := exec.Command("openssl", cipher, "-a", "-pass", "env:VAULT_MASTER")
+	cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", self.master))
+	cmd.Stdout = outstream
+	pipe, err := cmd.StdinPipe()
+	if err != nil {
+		return errors.Decorated(err)
+	}
+
+	for _, k := range self.data {
+		code := k.Encoded()
+		n, err := pipe.Write([]byte(code))
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		if n < len(code) {
+			return errors.Newf("Incomplete write")
+		}
+	}
+
+	return
+}
+
+func (self *vault) Save(force bool, config core.Config) (err error) {
+	if force || self.dirty {
+		err = self.save(config)
+		if err != nil {
+			return
+		}
+		self.dirty = false
+	}
 	return
 }
