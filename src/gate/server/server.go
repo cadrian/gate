@@ -55,7 +55,7 @@ type Server interface {
 }
 
 type ServerLocal interface {
-	Server
+	Server() Server
 	Wait() (int, error)
 }
 
@@ -78,7 +78,12 @@ type server struct {
 	status chan int
 }
 
-var _ ServerLocal = &server{}
+type serverLocal struct {
+	server *server
+}
+
+var _ Server = &server{}
+var _ ServerLocal = &serverLocal{}
 
 func newVault(file string) Vault {
 	in := func() (result io.ReadCloser, err error) {
@@ -105,7 +110,7 @@ func Start(config core.Config, port int) (result ServerLocal, err error) {
 		config: config,
 		status: make(chan int),
 	}
-	rpc.Register(srv)
+	rpc.RegisterName("Gate", srv)
 	rpc.HandleHTTP()
 	srv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -119,7 +124,9 @@ func Start(config core.Config, port int) (result ServerLocal, err error) {
 	}
 
 	go http.Serve(srv.listener, srv.handler)
-	result = srv
+	result = &serverLocal {
+		server: srv,
+	}
 	return
 }
 
@@ -244,12 +251,16 @@ func (self *server) Stop(status int, reply *bool) (err error) {
 	return
 }
 
-func (self *server) Wait() (result int, err error) {
-	if self.running {
-		result = <-self.status
-		self.handler.lock.Lock() // will never unlock, but the server is dead anyway (this barrier ensures that all connections are served)
+func (self *serverLocal) Wait() (result int, err error) {
+	if self.server.running {
+		result = <-self.server.status
+		self.server.handler.lock.Lock() // will never unlock, but the server is dead anyway (this barrier ensures that all connections are served)
 	} else {
 		err = errors.New("server not running")
 	}
 	return
+}
+
+func (self *serverLocal) Server() Server {
+	return self.server
 }

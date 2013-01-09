@@ -44,7 +44,7 @@ func Proxy(serverAddress string, port int) (result Server, err error) {
 }
 
 func (self *proxy) IsOpen(thenClose bool, reply *bool) (err error) {
-	err = self.client.Call("Server.IsOpen", thenClose, reply)
+	err = self.client.Call("Gate.IsOpen", thenClose, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -52,7 +52,7 @@ func (self *proxy) IsOpen(thenClose bool, reply *bool) (err error) {
 }
 
 func (self *proxy) Get(name string, reply *string) (err error) {
-	err = self.client.Call("Server.Get", name, reply)
+	err = self.client.Call("Gate.Get", name, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -60,7 +60,7 @@ func (self *proxy) Get(name string, reply *string) (err error) {
 }
 
 func (self *proxy) List(filter string, reply *[]string) (err error) {
-	err = self.client.Call("Server.List", filter, reply)
+	err = self.client.Call("Gate.List", filter, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -68,7 +68,7 @@ func (self *proxy) List(filter string, reply *[]string) (err error) {
 }
 
 func (self *proxy) Open(master string, reply *bool) (err error) {
-	err = self.client.Call("Server.Open", master, reply)
+	err = self.client.Call("Gate.Open", master, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -76,7 +76,7 @@ func (self *proxy) Open(master string, reply *bool) (err error) {
 }
 
 func (self *proxy) Merge(args MergeArgs, reply *bool) (err error) {
-	err = self.client.Call("Server.Merge", args, reply)
+	err = self.client.Call("Gate.Merge", args, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -84,7 +84,7 @@ func (self *proxy) Merge(args MergeArgs, reply *bool) (err error) {
 }
 
 func (self *proxy) Save(force bool, reply *bool) (err error) {
-	err = self.client.Call("Server.Save", force, reply)
+	err = self.client.Call("Gate.Save", force, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -92,7 +92,7 @@ func (self *proxy) Save(force bool, reply *bool) (err error) {
 }
 
 func (self *proxy) Set(args SetArgs, reply *string) (err error) {
-	err = self.client.Call("Server.Set", args, reply)
+	err = self.client.Call("Gate.Set", args, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -100,7 +100,7 @@ func (self *proxy) Set(args SetArgs, reply *string) (err error) {
 }
 
 func (self *proxy) Unset(key string, reply *bool) (err error) {
-	err = self.client.Call("Server.Unset", key, reply)
+	err = self.client.Call("Gate.Unset", key, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
@@ -108,7 +108,7 @@ func (self *proxy) Unset(key string, reply *bool) (err error) {
 }
 
 func (self *proxy) Stop(status int, reply *bool) (err error) {
-	err = self.client.Call("Server.Stop", status, reply)
+	err = self.client.Call("Gate.Stop", status, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}
