@@ -60,12 +60,12 @@ type ServerLocal interface {
 }
 
 type blockingHandler struct {
-	lock *sync.Mutex
+	lock *sync.RWMutex
 }
 
 func (self *blockingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	self.lock.Lock()
-	defer self.lock.Unlock()
+	self.lock.RLock()
+	defer self.lock.RUnlock()
 	http.DefaultServeMux.ServeHTTP(w, r)
 }
 
@@ -115,7 +115,7 @@ func Start(config core.Config, port int) (result ServerLocal, err error) {
 	srv.running = true
 
 	srv.handler = &blockingHandler{
-		lock: &sync.Mutex{},
+		lock: &sync.RWMutex{},
 	}
 
 	go http.Serve(srv.listener, srv.handler)
