@@ -27,6 +27,7 @@ type Key interface {
 	Delete()
 	Encoded() string
 	Merge(other Key)
+	SetPassword(pass string)
 }
 
 var _ Key = &key{}
@@ -71,4 +72,9 @@ func (self *key) Merge(other Key) {
 		self.pass = okey.pass
 		self.addcount = okey.addcount
 	}
+}
+
+func (self *key) SetPassword(pass string) {
+	self.pass = pass
+	self.addcount = self.addcount + 1
 }

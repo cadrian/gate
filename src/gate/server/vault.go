@@ -42,6 +42,8 @@ type Vault interface {
 	List(filter string) ([]string, error)
 	Merge(other Vault) error
 	Save(force bool, config core.Config) error
+	SetRandom(name string, recipe string) error
+	SetPass(name string, pass string) error
 }
 
 type vault struct {
@@ -51,6 +53,7 @@ type vault struct {
 	out Out
 	open bool
 	master string
+	recipes map[string]Generator
 }
 
 var _ Vault = &vault{}
@@ -60,6 +63,7 @@ func NewVault(in In, out Out) (result Vault) {
 		data: make(map[string]*key),
 		in: in,
 		out: out,
+		recipes: make(map[string]Generator, 32),
 	}
 	return
 }
@@ -252,5 +256,36 @@ func (self *vault) Save(force bool, config core.Config) (err error) {
 		}
 		self.dirty = false
 	}
+	return
+}
+
+func (self *vault) generatePass(recipe string) (result string, err error) {
+	gen, ok := self.recipes[recipe]
+	if !ok {
+		gen, err = NewGenerator(recipe)
+		if err != nil {
+			return
+		}
+		self.recipes[recipe] = gen
+	}
+	return gen.New()
+}
+
+func (self *vault) SetRandom(name string, recipe string) (err error) {
+	pass, err := self.generatePass(recipe)
+	if err != nil {
+		return
+	}
+	return self.SetPass(name, pass)
+}
+
+func (self *vault) SetPass(name string, pass string) (err error) {
+	k, ok := self.data[name]
+	if !ok {
+		k = &key{}
+		self.data[name] = k
+	}
+	k.SetPassword(pass)
+	self.dirty = true
 	return
 }

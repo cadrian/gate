@@ -35,10 +35,17 @@ type MergeArgs struct {
 	Master string
 }
 
+type SetArgs struct {
+	Key string
+	Pass string
+	Recipe string
+}
+
 type Server interface {
 	Open(master string, reply *bool) error
 	IsOpen(thenClose bool, reply *bool) error
 	Get(key string, reply *string) error
+	Set(args SetArgs, reply *string) error
 	List(filter string, reply *[]string) error
 	Merge(args MergeArgs, reply *bool) error
 	Save(force bool, reply *bool) error
@@ -100,7 +107,7 @@ func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
 
 func (self *server) Get(name string, reply *string) (err error) {
 	if !self.vault.IsOpen() {
-		return errors.Newf("Vault is not open: cannot retrieve %s", name)
+		return errors.Newf("Vault is not open: cannot get %s", name)
 	}
 	key, err := self.vault.Item(name)
 	if err != nil {
@@ -162,5 +169,21 @@ func (self *server) Save(force bool, reply *bool) (err error) {
 		return
 	}
 	*reply = true
+	return
+}
+
+func (self *server) Set(args SetArgs, reply *string) (err error) {
+	if !self.vault.IsOpen() {
+		return errors.Newf("Vault is not open: cannot set")
+	}
+	if args.Recipe != "" {
+		err = self.vault.SetRandom(args.Key, args.Recipe)
+	} else {
+		err = self.vault.SetPass(args.Key, args.Pass)
+	}
+	if err != nil {
+		return
+	}
+	err = self.Get(args.Key, reply)
 	return
 }

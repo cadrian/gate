@@ -90,3 +90,11 @@ func (self *proxy) Save(force bool, reply *bool) (err error) {
 	}
 	return
 }
+
+func (self *proxy) Set(args SetArgs, reply *string) (err error) {
+	err = self.client.Call("Server.Set", args, reply)
+	if err != nil {
+		err = errors.Decorated(err)
+	}
+	return
+}
