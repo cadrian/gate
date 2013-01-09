@@ -116,7 +116,7 @@ func read(file string, dirs []string) (result io.ReadCloser, err error) {
 			return
 		}
 	}
-	err = errors.Newf("Could not find file %s", file)
+	err = errors.Newf("Could not find file %s (looked in %s/gate)", file, strings.Join(dirs, "/gate, "))
 	return
 }
 

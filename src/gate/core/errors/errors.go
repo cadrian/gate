@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
+	"strings"
 )
 
 type StackError struct {
@@ -32,12 +33,17 @@ func (self StackError) Error() string {
 }
 
 func newerror(err error) error {
-	const size = 4096
+	const size = 16384
 	buf := make([]byte, size)
 	buf = buf[:runtime.Stack(buf, false)]
+
+	// skip the frames inside this package (4 irrelevant lines)
+	stack := strings.Split(string(buf), "\n")
+	stacktrace := fmt.Sprintf("Traceback of %s\n%s", stack[0], strings.Join(stack[5:], "\n"))
+
 	return StackError{
 		Nested: err,
-		StackTrace: string(buf),
+		StackTrace: stacktrace,
 	}
 }
 

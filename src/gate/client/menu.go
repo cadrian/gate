@@ -66,7 +66,7 @@ func displayMenu(config core.Config, list []string) (err error) {
 func Menu(config core.Config) (err error) {
 	server, err := proxy(config)
 	if err != nil {
-		return errors.Decorated(err)
+		return
 	}
 	var list []string
 	err = server.List(".*", &list)
