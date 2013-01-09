@@ -74,3 +74,11 @@ func (self *proxy) Open(master string, reply *bool) (err error) {
 	}
 	return
 }
+
+func (self *proxy) Merge(args MergeArgs, reply *bool) (err error) {
+	err = self.client.Call("Server.Merge", args, reply)
+	if err != nil {
+		err = errors.Decorated(err)
+	}
+	return
+}

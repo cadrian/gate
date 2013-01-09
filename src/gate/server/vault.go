@@ -37,11 +37,13 @@ type Vault interface {
 	Close() error
 	Item(name string) (Key, error)
 	List(filter string) ([]string, error)
+	Merge(other Vault) error
 }
 
 type vault struct {
 	data map[string]*key
 	open bool
+	dirty bool
 	in func() (io.ReadCloser, error)
 }
 
@@ -178,5 +180,23 @@ func (self *vault) List(filter string) (result []string, err error) {
 		}
 	}
 	result = result[:len(result)]
+	return
+}
+
+func (self *vault) Merge(o Vault) (err error) {
+	other := o.(*vault)
+	for keyname, key := range self.data {
+		other_key, ok := other.data[keyname]
+		if ok {
+			key.Merge(other_key)
+		}
+	}
+	for keyname, key := range other.data {
+		_, ok := self.data[keyname]
+		if !ok {
+			self.data[keyname] = key
+		}
+	}
+	self.dirty = true
 	return
 }

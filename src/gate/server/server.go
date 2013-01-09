@@ -30,11 +30,17 @@ import (
 	"os"
 )
 
+type MergeArgs struct {
+	Vault string
+	Master string
+}
+
 type Server interface {
 	Open(master string, reply *bool) error
 	IsOpen(thenClose bool, reply *bool) error
 	Get(key string, reply *string) error
 	List(filter string, reply *[]string) error
+	Merge(args MergeArgs, reply *bool) error
 }
 
 type server struct {
@@ -113,5 +119,31 @@ func (self *server) Open(master string, reply *bool) (err error) {
 		return errors.Newf("Vault is already open: cannot open")
 	}
 	err = self.vault.Open(master, self.config)
+	return
+}
+
+func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
+	if !self.vault.IsOpen() {
+		return errors.Newf("Vault is not open: cannot merge")
+	}
+	in := func () (result io.ReadCloser, err error) {
+		return os.Open(args.Vault)
+	}
+	vault := NewVault(in)
+	err = vault.Open(args.Master, self.config)
+	if err != nil {
+		return
+	}
+	if !vault.IsOpen() {
+		return errors.Newf("Merge vault is not open: cannot merge")
+	}
+	err = self.vault.Merge(vault)
+	if err != nil {
+		return
+	}
+	err = vault.Close()
+	if err != nil {
+		return
+	}
 	return
 }
