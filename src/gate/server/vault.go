@@ -19,6 +19,7 @@ package server
 import (
 	"gate/core"
 	"gate/core/errors"
+	"gate/core/exec"
 )
 
 import (
@@ -27,7 +28,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"regexp"
 	"sort"
 	"strconv"
@@ -138,31 +138,34 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 		return
 	}
 
-	cmd := exec.Command("openssl", cipher, "-d", "-a", "-pass", "env:VAULT_MASTER")
-	cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", master))
-	cmd.Stdin = instream
-
-	out, err := cmd.StdoutPipe()
-	if err != nil {
-		return errors.Decorated(err)
-	}
-
 	barrier := make(chan error)
-	go self.decode(out, barrier)
 
-	err = cmd.Start()
-	if err != nil {
-		return errors.Decorated(err)
+	prepare := func (cmd *exec.Cmd) (err error) {
+		cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", master))
+		cmd.Stdin = instream
+
+		out, err := cmd.StdoutPipe()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+
+		go self.decode(out, barrier)
+
+		return
 	}
 
-	err = <-barrier
-	if err != io.EOF {
-		return errors.Decorated(err)
+	run := func (cmd *exec.Cmd) (err error) {
+		e := <-barrier
+		if e != io.EOF {
+			err = errors.Decorated(e)
+		}
+
+		return
 	}
 
-	err = cmd.Wait()
+	err = exec.Command(prepare, run, "openssl", cipher, "-d", "-a", "-pass", "env:VAULT_MASTER")
 	if err != nil {
-		return errors.Decorated(err)
+		return
 	}
 
 	self.master = master
@@ -242,24 +245,39 @@ func (self *vault) save(config core.Config) (err error) {
 		return err
 	}
 
-	cmd := exec.Command("openssl", cipher, "-a", "-pass", "env:VAULT_MASTER")
-	cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", self.master))
-	cmd.Stdout = outstream
-	pipe, err := cmd.StdinPipe()
-	if err != nil {
-		return errors.Decorated(err)
-	}
+	pipe := make(chan io.WriteCloser, 1)
 
-	for _, k := range self.data {
-		code := k.Encoded()
-		n, err := pipe.Write([]byte(code))
+	prepare := func (cmd *exec.Cmd) (err error) {
+		cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", self.master))
+		cmd.Stdout = outstream
+		p, err := cmd.StdinPipe()
 		if err != nil {
 			return errors.Decorated(err)
 		}
-		if n < len(code) {
-			return errors.Newf("Incomplete write")
-		}
+		pipe <- p
+		return
 	}
+
+	run := func (cmd *exec.Cmd) (err error) {
+		p := <-pipe
+		for _, k := range self.data {
+			code := k.Encoded()
+			n, err := p.Write([]byte(code))
+			if err != nil {
+				return errors.Decorated(err)
+			}
+			if n < len(code) {
+				return errors.Newf("Incomplete write")
+			}
+		}
+		err = p.Close()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		return
+	}
+
+	err = exec.Command(prepare, run, "openssl", cipher, "-a", "-pass", "env:VAULT_MASTER")
 
 	return
 }

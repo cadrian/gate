@@ -19,14 +19,15 @@ package client
 import (
 	"gate/core"
 	"gate/core/errors"
+	"gate/core/exec"
 	"gate/server"
 )
 
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -45,26 +46,31 @@ func dirname() (result string) {
 }
 
 func startServer() (err error) {
-	cmd := exec.Command("at", "now")
-	in, err := cmd.StdinPipe()
-	if err != nil {
-		return errors.Decorated(err)
-	}
-	err = cmd.Start()
-	if err != nil {
-		return errors.Decorated(err)
-	}
+	pipe := make(chan io.WriteCloser, 1)
 
-	in.Write([]byte(fmt.Sprintf("%s/server > /tmp/server.log 2>&1\n", dirname())))
-
-	err = in.Close()
-	if err != nil {
-		return errors.Decorated(err)
+	prepare := func (cmd *exec.Cmd) (err error) {
+		p, err := cmd.StdinPipe()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		pipe <- p
+		return
 	}
 
-	err = cmd.Wait()
+	run := func (cmd *exec.Cmd) (err error) {
+		p := <-pipe
+		p.Write([]byte(fmt.Sprintf("%s/server > /tmp/server.log 2>&1\n", dirname())))
+
+		err = p.Close()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		return
+	}
+
+	err = exec.Command(prepare, run, "at", "now")
 	if err != nil {
-		return errors.Decorated(err)
+		return
 	}
 
 	// let the server get cozy
@@ -98,34 +104,40 @@ func readPassword(config core.Config, text string) (result string, err error) {
 	}
 	barrier := make(chan barrierData)
 
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("%s %s", command, arguments))
-	out, err := cmd.StdoutPipe()
+	prepare := func (cmd *exec.Cmd) (err error) {
+		out, err := cmd.StdoutPipe()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+
+		go func() {
+			n, err := buffer.ReadFrom(out)
+			barrier <- barrierData{n, err}
+		}()
+		return
+	}
+
+	resulter := make(chan string, 1)
+
+	run := func (cmd *exec.Cmd) (err error) {
+		data := <-barrier
+		if data.err != nil {
+			return errors.Decorated(err)
+		}
+
+		// the last character is a \n -- ignore it
+		resulter <- string(buffer.Bytes()[:data.n-1])
+
+		return
+	}
+
+	err = exec.Command(prepare, run, "bash", "-c", fmt.Sprintf("%s %s", command, arguments))
 	if err != nil {
-		return "", errors.Decorated(err)
+		return
 	}
 
-	go func() {
-		n, err := buffer.ReadFrom(out)
-		barrier <- barrierData{n, err}
-	}()
-
-	err = cmd.Start()
-	if err != nil {
-		return "", errors.Decorated(err)
-	}
-
-	data := <-barrier
-	if data.err != nil {
-		return "", errors.Decorated(err)
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		return "", errors.Decorated(err)
-	}
-
-	// the last character is a \n -- ignore it
-	return string(buffer.Bytes()[:data.n-1]), nil
+	result = <-resulter
+	return
 }
 
 func readNewMaster(config core.Config, reason string) (result string, err error) {

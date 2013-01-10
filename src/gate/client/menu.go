@@ -19,12 +19,13 @@ package client
 import (
 	"gate/core"
 	"gate/core/errors"
+	"gate/core/exec"
 )
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"os/exec"
 )
 
 func displayMenu(config core.Config, list []string) (err error) {
@@ -37,29 +38,32 @@ func displayMenu(config core.Config, list []string) (err error) {
 		return
 	}
 
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("%s %s", command, arguments))
-	in, err := cmd.StdinPipe()
-	if err != nil {
-		return errors.Decorated(err)
-	}
-	err = cmd.Start()
-	if err != nil {
-		return errors.Decorated(err)
+	pipe := make(chan io.WriteCloser, 1)
+
+	prepare := func (cmd *exec.Cmd) (err error) {
+		p, err := cmd.StdinPipe()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		pipe <- p
+		return
 	}
 
-	for _, entry := range list {
-		in.Write([]byte(entry + "\n"))
+	run := func (cmd *exec.Cmd) (err error) {
+		p := <-pipe
+
+		for _, entry := range list {
+			p.Write([]byte(entry + "\n"))
+		}
+
+		err = p.Close()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		return
 	}
 
-	err = in.Close()
-	if err != nil {
-		return errors.Decorated(err)
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		return errors.Decorated(err)
-	}
+	err = exec.Command(prepare, run, "bash", "-c", fmt.Sprintf("%s %s", command, arguments))
 
 	return
 }
