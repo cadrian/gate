@@ -17,29 +17,40 @@
 package client
 
 import (
-	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
 	"gate/server"
 )
 
 import (
-	"fmt"
+	"bytes"
 	"io"
-	"os"
 )
 
-func displayMenu(config core.Config, srv server.Server, list []string) (err error) {
-	command, err := config.Eval("", "menu", "command", os.Getenv)
+func xclip(srv server.Server, out io.Reader, barrier chan error) {
+	buffer := &bytes.Buffer{}
+	n, err := buffer.ReadFrom(out)
 	if err != nil {
+		barrier <- err
 		return
 	}
-	arguments, err := config.Eval("", "menu", "arguments", nil)
+	name := string(buffer.Bytes()[:n-1])
+
+	var pass string
+	err = srv.Get(name, &pass)
 	if err != nil {
+		barrier <- err
 		return
 	}
 
-	barrier := make(chan error)
+	p := _xclip(pass, barrier, "primary")
+	c := _xclip(pass, barrier, "clipboard")
+	if p && c {
+		barrier <- io.EOF
+	}
+}
+
+func _xclip(name string, barrier chan error, selection string) bool {
 	pipe := make(chan io.WriteCloser, 1)
 
 	prepare := func (cmd *exec.Cmd) (err error) {
@@ -47,54 +58,25 @@ func displayMenu(config core.Config, srv server.Server, list []string) (err erro
 		if err != nil {
 			return errors.Decorated(err)
 		}
-
-		out, err := cmd.StdoutPipe()
-		if err != nil {
-			return errors.Decorated(err)
-		}
-
-		go xclip(srv, out, barrier)
-
 		pipe <- p
 		return
 	}
 
 	run := func (cmd *exec.Cmd) (err error) {
 		p := <-pipe
-
-		for _, entry := range list {
-			p.Write([]byte(entry + "\n"))
-		}
-
+		p.Write([]byte(name+"\n"))
 		err = p.Close()
 		if err != nil {
 			return errors.Decorated(err)
 		}
-
-		e := <-barrier
-		if e != io.EOF {
-			err = errors.Decorated(e)
-		}
 		return
 	}
 
-	err = exec.Command(prepare, run, "bash", "-c", fmt.Sprintf("%s %s", command, arguments))
-
-	return
-}
-
-func Menu(config core.Config) (err error) {
-	srv, err := proxy(config)
+	err := exec.Command(prepare, run, "xclip", "-selection", selection)
 	if err != nil {
-		return
+		barrier <- err
+		return false
 	}
-	var list []string
-	err = srv.List(".*", &list)
-	if err != nil {
-		return errors.Decorated(err)
-	}
-	if len(list) > 0 {
-		err = displayMenu(config, srv, list)
-	}
-	return
+
+	return true
 }
