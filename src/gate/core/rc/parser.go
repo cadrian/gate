@@ -15,6 +15,8 @@
 
 package rc
 
+// the config parser
+
 import (
 	"io"
 )
@@ -127,9 +129,10 @@ func (self *File) readNamedSection(content *FileContent) (err error) {
 	return
 }
 
+// Read all the data (until EOF) and returns the configuration object.
 func Read(in io.Reader) (result *File, err error) {
 	result = &File{Sections: make(map[string]*Section)}
-	content := readFile(in)
+	content := ReadFile(in)
 	if content.IsValid() {
 		err = result.readAnonymousSection(content)
 	}

@@ -15,6 +15,8 @@
 
 package server
 
+// Keys vault management
+
 import (
 	"gate/core"
 	"gate/core/errors"
@@ -33,9 +35,13 @@ import (
 	"strings"
 )
 
+// Return a reader
 type In func() (io.ReadCloser, error)
+
+// Return a writer
 type Out func() (io.WriteCloser, error)
 
+// The vault interface.
 type Vault interface {
 	Open(master string, config core.Config) error
 	IsOpen() bool
@@ -61,6 +67,7 @@ type vault struct {
 
 var _ Vault = &vault{}
 
+// Create a new vault.
 func NewVault(in In, out Out) (result Vault) {
 	result = &vault{
 		data: make(map[string]*key),
@@ -273,6 +280,7 @@ func (self *vault) save(config core.Config) (err error) {
 		if err != nil {
 			return errors.Decorated(err)
 		}
+		return
 	}
 
 	err = exec.Command(prepare, run, "openssl", cipher, "-a", "-pass", "env:VAULT_MASTER")

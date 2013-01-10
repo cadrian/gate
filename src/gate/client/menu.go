@@ -84,6 +84,8 @@ func displayMenu(config core.Config, srv server.Server, list []string) (err erro
 	return
 }
 
+// Get the list of passwords from the server, displays a list and puts
+// the corresponding password in xclip
 func Menu(config core.Config) (err error) {
 	srv, err := proxy(config)
 	if err != nil {

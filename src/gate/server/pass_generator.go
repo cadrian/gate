@@ -15,16 +15,20 @@
 
 package server
 
+// A passwords generator
+
 import (
 	"gate/core/errors"
 )
 
 import (
 	"io"
-
+	"os"
 )
 
+// Password generator
 type Generator interface {
+	// Generate a new password and return it.
 	New() (result string, err error)
 }
 
@@ -96,6 +100,7 @@ type parse_generator_context struct {
 	source string
 }
 
+// Return a generator using the given source.
 func NewGenerator(source string) (result Generator, err error) {
 	context := &parse_generator_context{
 		recipe: make([]generator_mix, 0, 128),

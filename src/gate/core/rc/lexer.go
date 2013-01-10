@@ -15,6 +15,8 @@
 
 package rc
 
+// tokenizer
+
 import (
 	"gate/core/errors"
 )
@@ -25,15 +27,18 @@ import (
 	"io"
 )
 
+// The content of a file.
 type FileContent struct {
 	data []rune
 	index int
 }
 
+// True if the current character offset is valid.
 func (self *FileContent) IsValid() bool {
 	return self.index >= 0 && self.index < len(self.data)
 }
 
+// The current character.
 func (self *FileContent) Current() (result rune, err error) {
 	if !self.IsValid() {
 		return 0, errors.Newf("invalid current character at index %d", self.index)
@@ -42,6 +47,7 @@ func (self *FileContent) Current() (result rune, err error) {
 	return
 }
 
+// Go to the next character, if possible.
 func (self *FileContent) Next() error {
 	if self.index > len(self.data) {
 		return errors.Newf("cannot go next, index out of range: %d > %d", self.index, len(self.data))
@@ -50,6 +56,7 @@ func (self *FileContent) Next() error {
 	return nil
 }
 
+// Go to the previous character, if possible.
 func (self *FileContent) Back() error {
 	if self.index < 0 {
 		return errors.Newf("cannot go back, index out of range: %d < 0", self.index)
@@ -58,6 +65,8 @@ func (self *FileContent) Back() error {
 	return nil
 }
 
+// Skip characters until the given function returns true; and returns the skipped characters.
+// The current character offset is updated accordingly.
 func (self *FileContent) SkipUntil(stop func(rune, int) bool) (result string, err error) {
 	buffer := &bytes.Buffer{}
 	var k rune
@@ -80,6 +89,7 @@ func (self *FileContent) SkipUntil(stop func(rune, int) bool) (result string, er
 	return
 }
 
+// Skip a word.
 func (self *FileContent) SkipWord() (result string, err error) {
 	return self.SkipUntil(func(k rune, index int) bool {
 		switch {
@@ -94,6 +104,7 @@ func (self *FileContent) SkipWord() (result string, err error) {
 	})
 }
 
+// Skip the given symbol.
 func (self *FileContent) SkipSymbol(symbol string) (result string, err error) {
 	for _, c := range symbol {
 		k, err := self.Current()
@@ -110,6 +121,7 @@ func (self *FileContent) SkipSymbol(symbol string) (result string, err error) {
 	return
 }
 
+// Skip spaces.
 func (self *FileContent) SkipBlanks() (result string, err error) {
 	return self.SkipUntil(func(k rune, index int) bool {
 		switch k {
@@ -120,6 +132,7 @@ func (self *FileContent) SkipBlanks() (result string, err error) {
 	})
 }
 
+// Skip to the end of the line.
 func (self *FileContent) SkipToEndOfLine() (result string, err error) {
 	return self.SkipUntil(func(k rune, index int) bool {
 		switch k {
@@ -130,11 +143,13 @@ func (self *FileContent) SkipToEndOfLine() (result string, err error) {
 	})
 }
 
+// A technical representation of the file content.
 func (self *FileContent) Debug() (result string) {
 	return fmt.Sprintf("File content: len=%d, index=%d, is valid: %t", len(self.data), self.index, self.IsValid())
 }
 
-func readFile(in io.Reader) (result *FileContent) {
+// Reads all the data (until EOF) and returns it into a file content object.
+func ReadFile(in io.Reader) (result *FileContent) {
 	data := &bytes.Buffer{}
 	data.ReadFrom(in)
 	result = &FileContent {

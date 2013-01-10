@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
+// Some execution facilities, because Gate relies a lot on process spawning
 package exec
 
 import (
@@ -26,6 +27,9 @@ import (
 
 type Cmd exec.Cmd
 
+// Spawn a given command.
+//  - prepare() is called after the command creation but before actually starting it
+//  - run() is called while the command is running and before waiting for its completion
 func Command(prepare func(cmd *Cmd) error, run func(cmd *Cmd) error, command string, arguments... string) (err error) {
 	cmd := exec.Command(command, arguments...)
 
@@ -56,14 +60,17 @@ func Command(prepare func(cmd *Cmd) error, run func(cmd *Cmd) error, command str
 	return
 }
 
+// A pipe to the command's stdin
 func (self *Cmd) StdinPipe() (io.WriteCloser, error) {
 	return ((*exec.Cmd)(self)).StdinPipe()
 }
 
+// A pipe to the command's stdout
 func (self *Cmd) StdoutPipe() (io.ReadCloser, error) {
 	return ((*exec.Cmd)(self)).StdoutPipe()
 }
 
+// A pipe to the command's stderr
 func (self *Cmd) StderrPipe() (io.ReadCloser, error) {
 	return ((*exec.Cmd)(self)).StderrPipe()
 }

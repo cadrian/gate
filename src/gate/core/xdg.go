@@ -15,6 +15,8 @@
 
 package core
 
+// opendesktop.org
+
 import (
 	"gate/core/errors"
 )
@@ -26,12 +28,19 @@ import (
 	"strings"
 )
 
+// XDG context
 type XdgContext interface {
+	// Find a data file and returns the corresponding reader.
 	ReadData(file string) (io.ReadCloser, error)
+	// Find a config file and returns the corresponding reader.
 	ReadConfig(file string) (io.ReadCloser, error)
+	// The XDG cache home (usually $HOME/.cache).
 	CacheHome() (string, error)
+	// The XDG runtime directory (usually inside /tmp).
 	RuntimeDir() (string, error)
+	// The XDG data directory (usually $HOME/.local/share).
 	DataHome() (string, error)
+	// The XDG configuration directory (usually $HOME/.config).
 	ConfigHome() (string, error)
 }
 
@@ -68,6 +77,7 @@ func getdirs(env string, home string, dflt string) []string {
 	return result
 }
 
+// Returns the XDG context
 func Xdg() (result XdgContext, err error) {
 	if xdg == nil {
 		var (

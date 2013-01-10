@@ -15,12 +15,16 @@
 
 package core
 
+// Configuration management
+
 import (
 	"gate/core/errors"
 	"gate/core/rc"
 )
 
+// An object mirroring the user configuration
 type Config interface {
+	// Get a configuration value; may be transformed by the evaluator (e.g. os.Getenv).
 	Eval(file string, section string, key string, evaluator func(string) string) (string, error)
 }
 
@@ -28,6 +32,7 @@ type config struct {
 	files map[string]*rc.File
 }
 
+// Get the user configuration
 func NewConfig() (result Config, err error) {
 	result = &config{
 		files: make(map[string]*rc.File),

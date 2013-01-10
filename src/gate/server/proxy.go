@@ -15,6 +15,8 @@
 
 package server
 
+// Client-side access to the server (implements all the RPC operations).
+
 import (
 	"gate/core/errors"
 )
@@ -30,6 +32,7 @@ type proxy struct {
 
 var _ Server = &proxy{}
 
+// Return a new proxy to the Gate server identified by the host name and port.
 func Proxy(serverAddress string, port int) (result Server, err error) {
 	client, err := rpc.DialHTTP("tcp", fmt.Sprintf("%s:%d", serverAddress, port))
 	if err != nil {
@@ -71,7 +74,7 @@ func (self *proxy) Open(master string, reply *bool) (err error) {
 	if err != nil {
 		err = errors.Decorated(err)
 	}
-
+	return
 }
 
 func (self *proxy) Merge(args MergeArgs, reply *bool) (err error) {

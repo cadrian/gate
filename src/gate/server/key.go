@@ -15,10 +15,13 @@
 
 package server
 
+// Vault keys
+
 import (
 	"fmt"
 )
 
+// A vault key
 type Key interface {
 	Name() string
 	Password() string
@@ -50,7 +53,7 @@ func (self *key) Password() string {
 }
 
 func (self *key) IsDeleted() bool {
-
+	return self.delcount > self.addcount
 }
 
 func (self *key) Delete() {

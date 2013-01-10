@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
+// Getting a stacktrace from Go errors.
 package errors
 
 import (
@@ -22,6 +23,7 @@ import (
 	"strings"
 )
 
+// An error and the corresponding stacktrace
 type StackError struct {
 	Nested error
 	StackTrace string
@@ -46,14 +48,21 @@ func newerror(err error) error {
 	}
 }
 
+// Create a brand new error using the provided message
 func New(message string) error {
 	return newerror(errors.New(message))
 }
 
+// Create a brand new error using the provided format and arguments
 func Newf(format string, args... interface{}) error {
 	return newerror(errors.New(fmt.Sprintf(format, args...)))
 }
 
+// Decorate an error
 func Decorated(err error) error {
+	switch err.(type) {
+	case StackError:
+		return err
+	}
 	return newerror(err)
 }

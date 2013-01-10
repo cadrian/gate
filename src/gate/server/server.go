@@ -15,6 +15,8 @@
 
 package server
 
+// Server-side (i.e. actual) server object
+
 import (
 	"gate/core"
 	"gate/core/errors"
@@ -31,17 +33,21 @@ import (
 	"sync"
 )
 
+// Arguments to the "merge" operation.
 type MergeArgs struct {
 	Vault string
 	Master string
 }
 
+// Arguments to the "set" operation.
 type SetArgs struct {
 	Key string
 	Pass string
 	Recipe string
 }
 
+// The server interface implemented both by the actual (server-side)
+// object and the proxy.
 type Server interface {
 	Open(master string, reply *bool) error
 	IsOpen(thenClose bool, reply *bool) error
@@ -51,9 +57,10 @@ type Server interface {
 	List(filter string, reply *[]string) error
 	Merge(args MergeArgs, reply *bool) error
 	Save(force bool, reply *bool) error
-
+	Stop(status int, reply *bool) error
 }
 
+// A server-side server and extra (non-exported) methods
 type ServerLocal interface {
 	Server() Server
 	Wait() (int, error)
@@ -95,6 +102,7 @@ func newVault(file string) Vault {
 	return NewVault(in, out)
 }
 
+// Start a server on localhost, listening on the given port
 func Start(config core.Config, port int) (result ServerLocal, err error) {
 	xdg, err := core.Xdg()
 	if err != nil {
