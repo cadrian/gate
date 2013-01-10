@@ -4,9 +4,9 @@ export GOPATH=$(dirname $(readlink -f $0))
 export PATH=$GOPATH/bin:"$PATH"
 
 echo Fetching deps
-go install github.com/sbinet/liner
-go install code.google.com/p/gomock/gomock
-go install code.google.com/p/gomock/mockgen
+go get github.com/sbinet/liner
+go get code.google.com/p/gomock/gomock
+go get code.google.com/p/gomock/mockgen
 
 echo Testing
 TESTS=$(find src/gate -name \*_test.go -exec dirname {} \; | uniq | cut -c5-)
