@@ -34,14 +34,15 @@ type proxy struct {
 var _ Server = &proxy{}
 
 // Return a new proxy to the Gate server identified by the host name and port.
-func Proxy(serverAddress string, port int) (result Server, err error) {
+func Proxy(host string, port int) (result Server, err error) {
 	var client *rpc.Client
 
-	client, err = rpc.DialHTTP("tcp", fmt.Sprintf("%s:%d", serverAddress, port))
+	endpoint := fmt.Sprintf("%s:%d", host, port)
+	client, err = rpc.DialHTTP("tcp", endpoint)
 	for delay := 100 * time.Millisecond; err != nil && delay <= 3 * time.Second; delay *= 2 {
 		// if the server just started, maybe it needs time to settle
 		time.Sleep(delay)
-		client, err = rpc.DialHTTP("tcp", fmt.Sprintf("%s:%d", serverAddress, port))
+		client, err = rpc.DialHTTP("tcp", endpoint)
 	}
 	if err != nil {
 		err = errors.Decorated(err)

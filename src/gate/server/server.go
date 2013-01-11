@@ -104,7 +104,7 @@ func newVault(file string) Vault {
 }
 
 // Start a server on localhost, listening on the given port
-func Start(config core.Config, port int) (result ServerLocal, err error) {
+func Start(config core.Config) (result ServerLocal, err error) {
 	log.Printf("Starting...")
 
 	xdg, err := core.Xdg()
@@ -123,7 +123,18 @@ func Start(config core.Config, port int) (result ServerLocal, err error) {
 	}
 	rpc.RegisterName("Gate", srv)
 	rpc.HandleHTTP()
-	srv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
+
+	host, e := config.Eval("", "connection", "host", os.Getenv)
+	if e != nil {
+		host = "127.0.0.1"
+	}
+	port, e := config.Eval("", "connection", "port", os.Getenv)
+	if e != nil {
+		port = "8532"
+	}
+
+	endpoint := fmt.Sprintf("%s:%s", host, port)
+	srv.listener, err = net.Listen("tcp", endpoint)
 	if err != nil {
 		err = errors.Decorated(err)
 		return

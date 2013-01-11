@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	srv, err := server.Start(cfg, 8532)
+	srv, err := server.Start(cfg)
 	if err != nil {
 		log.Fatalln(err)
 	}
