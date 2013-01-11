@@ -15,7 +15,12 @@
 
 package commands
 
+import (
+	"gate/server"
+)
+
 type cmd_merge struct {
+	server server.Server
 }
 
 var _ Cmd = &cmd_merge{}

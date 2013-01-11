@@ -17,8 +17,22 @@ package main
 
 import (
 	"gate/client"
+	"gate/core"
+)
+
+import (
+	"log"
+	"os"
 )
 
 func main() {
-	client.Console()
+	cfg, err := core.NewConfig()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = client.Console(cfg)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	os.Exit(0)
 }

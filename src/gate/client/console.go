@@ -17,21 +17,24 @@ package client
 
 import (
 	"gate/client/commands"
+	"gate/core"
 )
 
 import (
 	"fmt"
 	"github.com/sbinet/liner"
-	"log"
 	"strings"
 )
 
 func run(line []string) (err error) {
-	return
+	cmd := commands.Command(line[0])
+	return cmd.Run(line)
 }
 
-func loop() (err error) {
-	commands.Init()
+func loop(config core.Config) (err error) {
+	srv, err := proxy(config)
+
+	commands.Init(srv)
 
 	state := liner.NewLiner()
 	defer state.Close()
@@ -57,7 +60,7 @@ func loop() (err error) {
 }
 
 // Run the console.
-func Console() {
+func Console(config core.Config) (err error) {
 	fmt.Printf(`
 [1;32mWelcome to the pwdmgr administration console![0m
 
@@ -71,8 +74,6 @@ Just hit [33m<enter>[0m to exit.
 
 `)
 
-	err := loop()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	err = loop(config)
+	return
 }

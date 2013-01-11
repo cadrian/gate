@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package client
+package xclip
 
 // Utils
 
@@ -24,34 +24,38 @@ import (
 )
 
 import (
-	"bytes"
 	"io"
 )
 
-func xclip(srv server.Server, out io.Reader, barrier chan error) {
-	buffer := &bytes.Buffer{}
-	n, err := buffer.ReadFrom(out)
+// Copy the data string into the X clipboard (both primary and clipboard)
+func Xclip(data string) (err error) {
+	err = xclip(data, "primary")
 	if err != nil {
-		barrier <- err
 		return
 	}
-	name := string(buffer.Bytes()[:n-1])
 
+	err = xclip(data, "clipboard")
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// Fetch the password from the server and xclips the corresponding password
+func XclipPassword(srv server.Server, name string) (err error) {
 	var pass string
 	err = srv.Get(name, &pass)
 	if err != nil {
-		barrier <- err
 		return
 	}
 
-	p := _xclip(pass, barrier, "primary")
-	c := _xclip(pass, barrier, "clipboard")
-	if p && c {
-		barrier <- io.EOF
-	}
+	err = Xclip(pass)
+
+	return
 }
 
-func _xclip(name string, barrier chan error, selection string) bool {
+func xclip(name string, selection string) (err error) {
 	pipe := make(chan io.WriteCloser, 1)
 
 	prepare := func (cmd *exec.Cmd) (err error) {
@@ -73,11 +77,6 @@ func _xclip(name string, barrier chan error, selection string) bool {
 		return
 	}
 
-	err := exec.Command(prepare, run, "xclip", "-selection", selection)
-	if err != nil {
-		barrier <- err
-		return false
-	}
-
-	return true
+	err = exec.Command(prepare, run, "xclip", "-selection", selection)
+	return
 }

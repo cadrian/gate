@@ -17,7 +17,6 @@ package client
 
 // Access to the server
 
-
 import (
 	"gate/core"
 	"gate/core/errors"

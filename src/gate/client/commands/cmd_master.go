@@ -15,7 +15,12 @@
 
 package commands
 
+import (
+	"gate/server"
+)
+
 type cmd_master struct {
+	server server.Server
 }
 
 var _ Cmd = &cmd_master{}

@@ -15,7 +15,13 @@
 
 package commands
 
+import (
+	"gate/client/xclip"
+	"gate/server"
+)
+
 type cmd_get struct {
+	server server.Server
 }
 
 var _ Cmd = &cmd_get{}
@@ -25,6 +31,7 @@ func (self *cmd_get) Name() string {
 }
 
 func (self *cmd_get) Run(line []string) (err error) {
+	err = xclip.XclipPassword(self.server, line[len(line)-1])
 	return
 }
 

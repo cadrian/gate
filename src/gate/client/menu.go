@@ -21,14 +21,35 @@ import (
 	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
+	"gate/client/xclip"
 	"gate/server"
 )
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 )
+
+func clipboard(srv server.Server, out io.Reader, barrier chan error) {
+	buffer := &bytes.Buffer{}
+	n, err := buffer.ReadFrom(out)
+	if err != nil {
+		barrier <- err
+		return
+	}
+	name := string(buffer.Bytes()[:n-1])
+
+	err = xclip.XclipPassword(srv, name)
+
+	if err == nil {
+		err = io.EOF
+	}
+
+	barrier <- err
+	return
+}
 
 func displayMenu(config core.Config, srv server.Server, list []string) (err error) {
 	command, err := config.Eval("", "menu", "command", os.Getenv)
@@ -54,7 +75,7 @@ func displayMenu(config core.Config, srv server.Server, list []string) (err erro
 			return errors.Decorated(err)
 		}
 
-		go xclip(srv, out, barrier)
+		go clipboard(srv, out, barrier)
 
 		pipe <- p
 		return
