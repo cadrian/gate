@@ -13,12 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
-import (
-	"gate/client"
-)
+type cmd_remote struct {
+}
 
-func main() {
-	client.Console()
+var _ Cmd = &cmd_remote{}
+
+func (self *cmd_remote) Name() string {
+	return "remote"
+}
+
+func (self *cmd_remote) Run(line []string) (err error) {
+	return
+}
+
+func (self *cmd_remote) Complete(line []string, word string) (result []string, err error) {
+	return
+}
+
+func (self *cmd_remote) Help(line []string) (result string, err error) {
+	return
 }

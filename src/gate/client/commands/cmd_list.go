@@ -13,12 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
-import (
-	"gate/client"
-)
+type cmd_list struct {
+}
 
-func main() {
-	client.Console()
+var _ Cmd = &cmd_list{}
+
+func (self *cmd_list) Name() string {
+	return "list"
+}
+
+func (self *cmd_list) Run(line []string) (err error) {
+	return
+}
+
+func (self *cmd_list) Complete(line []string, word string) (result []string, err error) {
+	return
+}
+
+func (self *cmd_list) Help(line []string) (result string, err error) {
+	return
 }

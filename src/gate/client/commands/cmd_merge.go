@@ -13,12 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
-import (
-	"gate/client"
-)
+type cmd_merge struct {
+}
 
-func main() {
-	client.Console()
+var _ Cmd = &cmd_merge{}
+
+func (self *cmd_merge) Name() string {
+	return "merge"
+}
+
+func (self *cmd_merge) Run(line []string) (err error) {
+	return
+}
+
+func (self *cmd_merge) Complete(line []string, word string) (result []string, err error) {
+	return
+}
+
+func (self *cmd_merge) Help(line []string) (result string, err error) {
+	return
 }

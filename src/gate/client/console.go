@@ -14,3 +14,65 @@
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
 package client
+
+import (
+	"gate/client/commands"
+)
+
+import (
+	"fmt"
+	"github.com/sbinet/liner"
+	"log"
+	"strings"
+)
+
+func run(line []string) (err error) {
+	return
+}
+
+func loop() (err error) {
+	commands.Init()
+
+	state := liner.NewLiner()
+	defer state.Close()
+
+	var line string
+
+	done := false
+	for !done {
+		line, err = state.Prompt("> ")
+		if err == nil && len(line) > 0 {
+			err = run(strings.Split(line, " "))
+			if err != nil {
+				return
+			}
+			state.AppendHistory(line)
+		} else {
+			done = true
+		}
+	}
+
+	fmt.Println()
+	return
+}
+
+// Run the console.
+func Console() {
+	fmt.Printf(`
+[1;32mWelcome to the pwdmgr administration console![0m
+
+[32mpwdmgr Copyright (C) 2012 Cyril Adrian <cyril.adrian@gmail.com>
+This program comes with ABSOLUTELY NO WARRANTY; for details type [33mshow w[32m.
+This is free software, and you are welcome to redistribute it
+under certain conditions; type [33mshow c[32m for details.[0m
+
+Type [33mhelp[0m for details on available options.
+Just hit [33m<enter>[0m to exit.
+
+`)
+
+	err := loop()
+	if err != nil {
+		log.Fatalln(err)
+	}
+}

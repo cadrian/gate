@@ -13,12 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
-import (
-	"gate/client"
-)
+type cmd_rem struct {
+}
 
-func main() {
-	client.Console()
+var _ Cmd = &cmd_rem{}
+
+func (self *cmd_rem) Name() string {
+	return "rem"
+}
+
+func (self *cmd_rem) Run(line []string) (err error) {
+	return
+}
+
+func (self *cmd_rem) Complete(line []string, word string) (result []string, err error) {
+	return
+}
+
+func (self *cmd_rem) Help(line []string) (result string, err error) {
+	return
 }
