@@ -24,6 +24,7 @@ import (
 import (
 	"fmt"
 	"net/rpc"
+	"time"
 )
 
 type proxy struct {
@@ -34,11 +35,19 @@ var _ Server = &proxy{}
 
 // Return a new proxy to the Gate server identified by the host name and port.
 func Proxy(serverAddress string, port int) (result Server, err error) {
-	client, err := rpc.DialHTTP("tcp", fmt.Sprintf("%s:%d", serverAddress, port))
+	var client *rpc.Client
+
+	client, err = rpc.DialHTTP("tcp", fmt.Sprintf("%s:%d", serverAddress, port))
+	for delay := 100 * time.Millisecond; err != nil && delay <= 3 * time.Second; delay *= 2 {
+		// if the server just started, maybe it needs time to settle
+		time.Sleep(delay)
+		client, err = rpc.DialHTTP("tcp", fmt.Sprintf("%s:%d", serverAddress, port))
+	}
 	if err != nil {
 		err = errors.Decorated(err)
 		return
 	}
+
 	result = &proxy{
 		client: client,
 	}
@@ -111,6 +120,14 @@ func (self *proxy) Unset(key string, reply *bool) (err error) {
 
 func (self *proxy) Stop(status int, reply *bool) (err error) {
 	err = self.client.Call("Gate.Stop", status, reply)
+	if err != nil {
+		err = errors.Decorated(err)
+	}
+	return
+}
+
+func (self *proxy) Ping(info string, reply *string) (err error) {
+	err = self.client.Call("Gate.Ping", info, reply)
 	if err != nil {
 		err = errors.Decorated(err)
 	}

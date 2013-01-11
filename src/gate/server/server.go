@@ -58,6 +58,7 @@ type Server interface {
 	Merge(args MergeArgs, reply *bool) error
 	Save(force bool, reply *bool) error
 	Stop(status int, reply *bool) error
+	Ping(info string, reply *string) error
 }
 
 // A server-side server and extra (non-exported) methods
@@ -104,6 +105,8 @@ func newVault(file string) Vault {
 
 // Start a server on localhost, listening on the given port
 func Start(config core.Config, port int) (result ServerLocal, err error) {
+	log.Printf("Starting...")
+
 	xdg, err := core.Xdg()
 	if err != nil {
 		return
@@ -135,6 +138,8 @@ func Start(config core.Config, port int) (result ServerLocal, err error) {
 	result = &serverLocal {
 		server: srv,
 	}
+
+	log.Printf("Started.")
 	return
 }
 
@@ -266,6 +271,12 @@ func (self *server) Stop(status int, reply *bool) (err error) {
 	self.running = false
 	self.status <- status
 	*reply = true
+	return
+}
+
+func (self *server) Ping(info string, reply *string) (err error) {
+	log.Printf("Ping('%s')", info)
+	*reply = info
 	return
 }
 

@@ -32,7 +32,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var _proxy server.Server
@@ -74,9 +73,6 @@ func startServer() (err error) {
 	if err != nil {
 		return
 	}
-
-	// let the server get cozy
-	time.Sleep(200 * time.Millisecond)
 
 	return
 }
