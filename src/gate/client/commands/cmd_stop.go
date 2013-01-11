@@ -16,6 +16,7 @@
 package commands
 
 import (
+	"gate/core/errors"
 	"gate/server"
 )
 
@@ -30,6 +31,16 @@ func (self *cmd_stop) Name() string {
 }
 
 func (self *cmd_stop) Run(line []string) (err error) {
+	var reply bool
+	err = self.server.Stop(0, &reply)
+	if err != nil {
+		return
+	}
+	if !reply {
+		err = errors.New("The server refused to stop")
+	} else {
+		err = errors.New("Server stopped, exiting.")
+	}
 	return
 }
 
