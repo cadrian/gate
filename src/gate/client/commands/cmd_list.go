@@ -19,6 +19,10 @@ import (
 	"gate/server"
 )
 
+import (
+	"fmt"
+)
+
 type cmd_list struct {
 	server server.Server
 }
@@ -30,6 +34,21 @@ func (self *cmd_list) Name() string {
 }
 
 func (self *cmd_list) Run(line []string) (err error) {
+	var reply []string
+	var filter string
+	if len(line) > 1 {
+		filter = line[1]
+	} else {
+		filter = ".*"
+	}
+	err = self.server.List(filter, &reply)
+	if err != nil {
+		return
+	}
+	// TODO call "less" instead of just printing
+	for _, name := range reply {
+		fmt.Printf("  * %s\n", name)
+	}
 	return
 }
 
