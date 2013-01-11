@@ -144,7 +144,7 @@ func Start(config core.Config, port int) (result ServerLocal, err error) {
 }
 
 func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
-	log.Printf("IsOpen(%t)", thenClose)
+	log.Printf("IsOpen(thenClose=%t)", thenClose)
 	if self.vault.IsOpen() {
 		*reply = true
 		if thenClose {
@@ -157,7 +157,7 @@ func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
 }
 
 func (self *server) Get(name string, reply *string) (err error) {
-	log.Printf("Get('%s')", name)
+	log.Printf("Get(name='%s')", name)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot get %s", name)
 	}
@@ -173,7 +173,7 @@ func (self *server) Get(name string, reply *string) (err error) {
 }
 
 func (self *server) List(filter string, reply *[]string) (err error) {
-	log.Printf("List('%s')", filter)
+	log.Printf("List(filter='%s')", filter)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot list")
 	}
@@ -182,7 +182,7 @@ func (self *server) List(filter string, reply *[]string) (err error) {
 }
 
 func (self *server) Open(master string, reply *bool) (err error) {
-	log.Printf("Open('***')")
+	log.Printf("Open(master='***')")
 	if self.vault.IsOpen() {
 		return errors.Newf("Vault is already open: cannot open")
 	}
@@ -192,7 +192,7 @@ func (self *server) Open(master string, reply *bool) (err error) {
 }
 
 func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
-	log.Printf("Merge('%s', '***')", args.Vault)
+	log.Printf("Merge(vault='%s', master='***')", args.Vault)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot merge")
 	}
@@ -217,7 +217,7 @@ func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
 }
 
 func (self *server) Save(force bool, reply *bool) (err error) {
-	log.Printf("Save(%t)", force)
+	log.Printf("Save(force=%t)", force)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot save")
 	}
@@ -230,7 +230,7 @@ func (self *server) Save(force bool, reply *bool) (err error) {
 }
 
 func (self *server) Set(args SetArgs, reply *string) (err error) {
-	log.Printf("Set('%s', ...)", args.Key)
+	log.Printf("Set(key='%s', ...)", args.Key)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot set")
 	}
@@ -247,7 +247,7 @@ func (self *server) Set(args SetArgs, reply *string) (err error) {
 }
 
 func (self *server) Unset(key string, reply *bool) (err error) {
-	log.Printf("Unset('%s')", key)
+	log.Printf("Unset(key='%s')", key)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot unset")
 	}
@@ -257,7 +257,7 @@ func (self *server) Unset(key string, reply *bool) (err error) {
 }
 
 func (self *server) Stop(status int, reply *bool) (err error) {
-	log.Printf("Stop(%d)", status)
+	log.Printf("Stop(status=%d)", status)
 	if self.vault.IsOpen() {
 		err = self.vault.Close()
 		if err != nil {
@@ -275,7 +275,7 @@ func (self *server) Stop(status int, reply *bool) (err error) {
 }
 
 func (self *server) Ping(info string, reply *string) (err error) {
-	log.Printf("Ping('%s')", info)
+	log.Printf("Ping(info='%s')", info)
 	*reply = info
 	return
 }
