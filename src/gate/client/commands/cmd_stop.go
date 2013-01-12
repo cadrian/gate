@@ -17,12 +17,9 @@ package commands
 
 import (
 	"gate/core/errors"
-	"gate/server"
 )
 
-type cmd_stop struct {
-	server server.Server
-}
+type cmd_stop cmd
 
 var _ Cmd = &cmd_stop{}
 

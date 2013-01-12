@@ -103,7 +103,7 @@ Just hit [33m<enter>[0m to exit.
 		return
 	}
 
-	commands.Init(srv)
+	commands.Init(srv, config)
 
 	state := liner.NewLiner()
 	defer state.Close()

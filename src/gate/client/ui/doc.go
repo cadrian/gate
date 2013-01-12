@@ -13,43 +13,5 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package commands
-
-import (
-	"fmt"
-)
-
-type cmd_list cmd
-
-var _ Cmd = &cmd_list{}
-
-func (self *cmd_list) Name() string {
-	return "list"
-}
-
-func (self *cmd_list) Run(line []string) (err error) {
-	var reply []string
-	var filter string
-	if len(line) > 1 {
-		filter = line[1]
-	} else {
-		filter = ".*"
-	}
-	err = self.server.List(filter, &reply)
-	if err != nil {
-		return
-	}
-	// TODO call "less" instead of just printing
-	for _, name := range reply {
-		fmt.Printf("  * %s\n", name)
-	}
-	return
-}
-
-func (self *cmd_list) Complete(line []string) (result []string, err error) {
-	return
-}
-
-func (self *cmd_list) Help(line []string) (result string, err error) {
-	return
-}
+// User interaction
+package ui

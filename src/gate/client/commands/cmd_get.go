@@ -16,17 +16,14 @@
 package commands
 
 import (
-	"gate/client/xclip"
-	"gate/server"
+	"gate/client/ui"
 )
 
 import (
 	"fmt"
 )
 
-type cmd_get struct {
-	server server.Server
-}
+type cmd_get cmd
 
 var _ Cmd = &cmd_get{}
 
@@ -35,7 +32,7 @@ func (self *cmd_get) Name() string {
 }
 
 func (self *cmd_get) Run(line []string) (err error) {
-	err = xclip.XclipPassword(self.server, line[len(line)-1])
+	err = ui.XclipPassword(self.server, line[len(line)-1])
 	return
 }
 

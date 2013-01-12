@@ -13,70 +13,77 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package xclip
-
-// Utils
+package ui
 
 import (
+	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
-	"gate/server"
 )
 
 import (
-	"io"
+	"bytes"
+	"fmt"
+	"os"
 )
 
-// Copy the data string into the X clipboard (both primary and clipboard)
-func Xclip(data string) (err error) {
-	err = xclip(data, "primary")
+func ReadPassword(config core.Config, text string) (result string, err error) {
+	command, err := config.Eval("", "password", "command", os.Getenv)
+	if err != nil {
+		return
+	}
+	env := func (name string) string {
+		switch name {
+		case "TEXT":
+			return text
+		}
+		return ""
+	}
+	arguments, err := config.Eval("", "password", "arguments", env)
 	if err != nil {
 		return
 	}
 
-	err = xclip(data, "clipboard")
-	if err != nil {
-		return
+	buffer := &bytes.Buffer{}
+
+	type barrierData struct {
+		n int64
+		err error
 	}
-
-	return
-}
-
-// Fetch the password from the server and xclips the corresponding password
-func XclipPassword(srv server.Server, name string) (err error) {
-	var pass string
-	err = srv.Get(name, &pass)
-	if err != nil {
-		return
-	}
-
-	err = Xclip(pass)
-
-	return
-}
-
-func xclip(name string, selection string) (err error) {
-	pipe := make(chan io.WriteCloser, 1)
+	barrier := make(chan barrierData)
 
 	prepare := func (cmd *exec.Cmd) (err error) {
-		p, err := cmd.StdinPipe()
+		out, err := cmd.StdoutPipe()
 		if err != nil {
 			return errors.Decorated(err)
 		}
-		pipe <- p
+
+		go func() {
+			n, err := buffer.ReadFrom(out)
+			barrier <- barrierData{n, err}
+		}()
 		return
 	}
+
+	resulter := make(chan string, 1)
 
 	run := func (cmd *exec.Cmd) (err error) {
-		p := <-pipe
-		p.Write([]byte(name+"\n"))
-		err = p.Close()
-		if err != nil {
+		data := <-barrier
+		if data.err != nil {
 			return errors.Decorated(err)
 		}
+
+		// the last character is a \n -- ignore it
+		resulter <- string(buffer.Bytes()[:data.n-1])
+
 		return
 	}
 
-	err = exec.Command(prepare, run, "xclip", "-selection", selection)
+	err = exec.Command(prepare, run, "bash", "-c", fmt.Sprintf("%s %s", command, arguments))
+	if err != nil {
+		return
+	}
+
+	result = <-resulter
 	return
 }

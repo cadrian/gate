@@ -15,13 +15,7 @@
 
 package commands
 
-import (
-	"gate/server"
-)
-
-type cmd_remote struct {
-	server server.Server
-}
+type cmd_remote cmd
 
 var _ Cmd = &cmd_remote{}
 

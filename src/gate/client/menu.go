@@ -21,7 +21,7 @@ import (
 	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
-	"gate/client/xclip"
+	"gate/client/ui"
 	"gate/server"
 )
 
@@ -41,7 +41,7 @@ func clipboard(srv server.Server, out io.Reader, barrier chan error) {
 	}
 	name := string(buffer.Bytes()[:n-1])
 
-	err = xclip.XclipPassword(srv, name)
+	err = ui.XclipPassword(srv, name)
 
 	if err == nil {
 		err = io.EOF

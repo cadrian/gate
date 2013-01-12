@@ -18,6 +18,7 @@ package client
 // Access to the server
 
 import (
+	"gate/client/ui"
 	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
@@ -25,7 +26,6 @@ import (
 )
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -76,77 +76,16 @@ func startServer() (err error) {
 	return
 }
 
-func readPassword(config core.Config, text string) (result string, err error) {
-	command, err := config.Eval("", "password", "command", os.Getenv)
-	if err != nil {
-		return
-	}
-	env := func (name string) string {
-		switch name {
-		case "TEXT":
-			return text
-		}
-		return ""
-	}
-	arguments, err := config.Eval("", "password", "arguments", env)
-	if err != nil {
-		return
-	}
-
-	buffer := &bytes.Buffer{}
-
-	type barrierData struct {
-		n int64
-		err error
-	}
-	barrier := make(chan barrierData)
-
-	prepare := func (cmd *exec.Cmd) (err error) {
-		out, err := cmd.StdoutPipe()
-		if err != nil {
-			return errors.Decorated(err)
-		}
-
-		go func() {
-			n, err := buffer.ReadFrom(out)
-			barrier <- barrierData{n, err}
-		}()
-		return
-	}
-
-	resulter := make(chan string, 1)
-
-	run := func (cmd *exec.Cmd) (err error) {
-		data := <-barrier
-		if data.err != nil {
-			return errors.Decorated(err)
-		}
-
-		// the last character is a \n -- ignore it
-		resulter <- string(buffer.Bytes()[:data.n-1])
-
-		return
-	}
-
-	err = exec.Command(prepare, run, "bash", "-c", fmt.Sprintf("%s %s", command, arguments))
-	if err != nil {
-		return
-	}
-
-	result = <-resulter
-	return
-}
-
 func readNewMaster(config core.Config, reason string) (result string, err error) {
 	var pass1, pass2, text string
 
 	text = fmt.Sprintf("%s,\nplease enter an encryption phrase.", reason)
 	for result == "" {
-		pass1, err = readPassword(config, text)
+		pass1, err = ui.ReadPassword(config, text)
 		if err != nil {
 			return
 		}
-		pass2, err = readPassword(config, "Please enter the same encryption phrase again.")
+		pass2, err = ui.ReadPassword(config, "Please enter the same encryption phrase again.")
 		if err != nil {
 			return
 		}
@@ -183,7 +122,7 @@ func openVault(srv server.Server, config core.Config) (err error) {
 			return
 		}
 	} else {
-		master, err = readPassword(config, "Please enter your encryption phrase\nto open the password vault.")
+		master, err = ui.ReadPassword(config, "Please enter your encryption phrase\nto open the password vault.")
 		if err != nil {
 			return
 		}

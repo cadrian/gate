@@ -16,12 +16,17 @@
 package commands
 
 import (
+	"gate/client/ui"
+	"gate/core/errors"
 	"gate/server"
 )
 
-type cmd_add struct {
-	server server.Server
-}
+import (
+	"fmt"
+	"os"
+)
+
+type cmd_add cmd
 
 var _ Cmd = &cmd_add{}
 
@@ -29,7 +34,70 @@ func (self *cmd_add) Name() string {
 	return "add"
 }
 
+func (self *cmd_add) generateArgs(key string, recipe string) (result server.SetArgs, err error) {
+	if recipe == "" {
+		recipe, err = self.config.Eval("", "console", "default_recipe", os.Getenv)
+		if err != nil {
+			return
+		}
+	}
+	result = server.SetArgs{
+		Key: key,
+		Recipe: recipe,
+	}
+	return
+}
+
+func (self *cmd_add) promptArgs(key string) (result server.SetArgs, err error) {
+	pass, err := ui.ReadPassword(self.config, fmt.Sprintf("Please enter the new password for %s", key))
+	if err != nil {
+		return
+	}
+	result = server.SetArgs{
+		Key: key,
+		Pass: pass,
+	}
+	return
+}
+
 func (self *cmd_add) Run(line []string) (err error) {
+	var arg server.SetArgs
+	switch len(line) {
+	case 2:
+		arg, err = self.generateArgs(line[1], "")
+	case 3:
+		action := line[2]
+		switch action {
+		case "generate":
+			arg, err = self.generateArgs(line[1], "")
+		case "prompt":
+			arg, err = self.promptArgs(line[1])
+		default:
+			err = errors.Newf("Unrecognized argument: '%s'", action)
+		}
+	case 4:
+		recipe := line[3]
+		action := line[2]
+		switch action {
+		case "generate":
+			arg, err = self.generateArgs(line[1], recipe)
+		default:
+			err = errors.Newf("Unrecognized argument: '%s'", action)
+		}
+	default:
+		err = errors.New("Invalid arguments")
+	}
+	if err != nil {
+		return
+	}
+
+	var pass string
+	err = self.server.Set(arg, &pass)
+	if err != nil {
+		return
+	}
+
+	err = ui.Xclip(pass)
 	return
 }
 

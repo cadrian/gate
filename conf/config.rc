@@ -12,3 +12,6 @@ arguments = --list --title=Gate --text=Gate --column=gate --separator= --width=3
 
 [vault]
 openssl.cipher = bf
+
+[console]
+default_recipe = an+s+14ansanansaan
