@@ -16,13 +16,19 @@
 package commands
 
 import (
+	"gate/core/errors"
 	"gate/server"
+)
+
+import (
+	"regexp"
+	"sort"
 )
 
 type Cmd interface {
 	Name() string
 	Run(line []string) error
-	Complete(line []string, word string) ([]string, error)
+	Complete(line []string) ([]string, error)
 	Help(line []string) (string, error)
 }
 
@@ -52,5 +58,23 @@ func Command(name string) (result Cmd) {
 	if !ok {
 		result = commands_map["get"]
 	}
+	return
+}
+
+func Commands(filter string) (result []string, err error) {
+	re_filter, err := regexp.Compile(filter)
+	if err != nil {
+		err = errors.Decorated(err)
+		return
+	}
+	result = make([]string, 0, len(commands_map))
+	for _, cmd := range commands_map {
+		name := cmd.Name()
+		if re_filter.MatchString(name) {
+			result = append(result, name)
+		}
+	}
+	result = result[:len(result)]
+	sort.Strings(result)
 	return
 }

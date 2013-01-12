@@ -52,7 +52,7 @@ func (self *cmd_list) Run(line []string) (err error) {
 	return
 }
 
-func (self *cmd_list) Complete(line []string, word string) (result []string, err error) {
+func (self *cmd_list) Complete(line []string) (result []string, err error) {
 	return
 }
 

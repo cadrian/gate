@@ -44,7 +44,7 @@ func (self *cmd_stop) Run(line []string) (err error) {
 	return
 }
 
-func (self *cmd_stop) Complete(line []string, word string) (result []string, err error) {
+func (self *cmd_stop) Complete(line []string) (result []string, err error) {
 	return
 }
 

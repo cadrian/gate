@@ -18,6 +18,7 @@ package client
 import (
 	"gate/client/commands"
 	"gate/core"
+	"gate/server"
 )
 
 import (
@@ -26,30 +27,53 @@ import (
 	"strings"
 )
 
-func run(line []string) (err error) {
+type readline struct {
+	server server.Server
+	state *liner.State
+	lastline string
+}
+
+func (self *readline) run(line []string) (err error) {
 	cmd := commands.Command(line[0])
 	return cmd.Run(line)
 }
 
-func loop(config core.Config) (err error) {
-	srv, err := proxy(config)
+func (self *readline) complete(line string) (result []string, err error) {
+	words := strings.Split(line, " ")
+	if len(words) == 1 {
+		return commands.Commands(fmt.Sprintf("^%s", words[0]))
+	}
+	cmd := commands.Command(words[0])
+	candidates, err := cmd.Complete(words)
+	if err != nil {
+		return
+	}
 
-	commands.Init(srv)
+	result = make([]string, 0, len(candidates))
+	n := len(words) - 1
+	for _, candidate := range candidates {
+		words[n] = candidate
+		result = append(result, strings.Join(words, " "))
+	}
 
-	state := liner.NewLiner()
-	defer state.Close()
+	return
+}
 
+func (self *readline) loop(config core.Config) (err error) {
 	var line string
 
 	done := false
 	for !done {
-		line, err = state.Prompt("> ")
+		line, err = self.state.Prompt("> ")
 		if err == nil && len(line) > 0 {
-			err = run(strings.Split(line, " "))
+			err = self.run(strings.Split(line, " "))
 			if err != nil {
 				return
 			}
-			state.AppendHistory(line)
+			if line != self.lastline {
+				self.state.AppendHistory(line)
+				self.lastline = line
+			}
 		} else {
 			done = true
 		}
@@ -74,6 +98,32 @@ Just hit [33m<enter>[0m to exit.
 
 `)
 
-	err = loop(config)
+	srv, err := proxy(config)
+	if err != nil {
+		return
+	}
+
+	commands.Init(srv)
+
+	state := liner.NewLiner()
+	defer state.Close()
+
+	rl := &readline {
+		server: srv,
+		state: state,
+	}
+
+	complete := func (line string) (result []string) {
+		result, err := rl.complete(line)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		return
+	}
+
+	state.SetCompleter(complete)
+
+	err = rl.loop(config)
 	return
 }

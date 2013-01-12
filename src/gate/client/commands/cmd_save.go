@@ -33,7 +33,7 @@ func (self *cmd_save) Run(line []string) (err error) {
 	return
 }
 
-func (self *cmd_save) Complete(line []string, word string) (result []string, err error) {
+func (self *cmd_save) Complete(line []string) (result []string, err error) {
 	return
 }
 

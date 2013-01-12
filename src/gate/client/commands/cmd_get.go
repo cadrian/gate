@@ -20,6 +20,10 @@ import (
 	"gate/server"
 )
 
+import (
+	"fmt"
+)
+
 type cmd_get struct {
 	server server.Server
 }
@@ -35,7 +39,12 @@ func (self *cmd_get) Run(line []string) (err error) {
 	return
 }
 
-func (self *cmd_get) Complete(line []string, word string) (result []string, err error) {
+func (self *cmd_get) Complete(line []string) (result []string, err error) {
+	var word string
+	if len(line) > 1 {
+		word = line[len(line)-1]
+	}
+	err = self.server.List(fmt.Sprintf("^%s", word), &result)
 	return
 }
 
