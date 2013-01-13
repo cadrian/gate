@@ -10,6 +10,10 @@ go get code.google.com/p/gomock/mockgen
 
 echo Testing
 TESTS=$(find src/gate -name \*_test.go -exec dirname {} \; | uniq | cut -c5-)
+
+mkdir -p src/gate/mock_server
+mockgen gate/server Server > src/gate/mock_server/server.go
+
 go test -i $TESTS
 go test $TESTS || exit 1
 
