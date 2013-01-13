@@ -24,7 +24,7 @@ import (
 	"testing"
 )
 
-func TestGetRun1(t *testing.T) {
+func TestListRun1(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -32,29 +32,14 @@ func TestGetRun1(t *testing.T) {
 	cfg := mocks.NewMockConfig(ctrl)
 
 	mmi := mocks.NewMockUserInteraction(ctrl)
-	get := &cmd_get{srv, cfg, mmi}
+	list := &cmd_list{srv, cfg, mmi}
 
-	mmi.EXPECT().XclipPassword("foo")
+	srv.EXPECT().List(".*", gomock.Any()).Do(func (filter string, reply *[]string) {
+		*reply = []string{"key1", "key2"}
+	})
+	//mmi.EXPECT().XclipPassword("foo")
 
-	err := get.Run([]string{"foo"})
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestGetRun2(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-
-	mmi := mocks.NewMockUserInteraction(ctrl)
-	get := &cmd_get{srv, cfg, mmi}
-
-	mmi.EXPECT().XclipPassword("foo")
-
-	err := get.Run([]string{"get", "foo"})
+	err := list.Run([]string{"list"})
 	if err != nil {
 		t.Error(err)
 	}
