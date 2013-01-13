@@ -18,12 +18,14 @@ package client
 import (
 	"gate/client/commands"
 	"gate/core"
+	"gate/core/errors"
 	"gate/server"
 )
 
 import (
 	"fmt"
 	"github.com/sbinet/liner"
+	"io"
 	"strings"
 )
 
@@ -68,7 +70,11 @@ func (self *readline) loop(config core.Config) (err error) {
 		if err == nil && len(line) > 0 {
 			err = self.run(strings.Split(line, " "))
 			if err != nil {
-				return
+				e, ok := err.(errors.StackError)
+				if !ok {
+					return
+				}
+				fmt.Println(strings.Split(e.Nested.Error(), "\n")[0])
 			}
 			if line != self.lastline {
 				self.state.AppendHistory(line)
@@ -86,9 +92,9 @@ func (self *readline) loop(config core.Config) (err error) {
 // Run the console.
 func Console(config core.Config) (err error) {
 	fmt.Printf(`
-[1;32mWelcome to the pwdmgr administration console![0m
+[1;32mWelcome to the Gate administration console![0m
 
-[32mpwdmgr Copyright (C) 2012 Cyril Adrian <cyril.adrian@gmail.com>
+[32mGate Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>
 This program comes with ABSOLUTELY NO WARRANTY; for details type [33mshow w[32m.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type [33mshow c[32m for details.[0m
@@ -124,6 +130,9 @@ Just hit [33m<enter>[0m to exit.
 
 	state.SetCompleter(complete)
 
-	err = rl.loop(config)
+	e := rl.loop(config)
+	if e != io.EOF {
+		err = e
+	}
 	return
 }

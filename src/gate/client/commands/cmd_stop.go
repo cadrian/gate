@@ -19,6 +19,10 @@ import (
 	"gate/core/errors"
 )
 
+import (
+	"io"
+)
+
 type cmd_stop cmd
 
 var _ Cmd = &cmd_stop{}
@@ -36,7 +40,7 @@ func (self *cmd_stop) Run(line []string) (err error) {
 	if !reply {
 		err = errors.New("The server refused to stop")
 	} else {
-		err = errors.New("Server stopped, exiting.")
+		err = io.EOF
 	}
 	return
 }
