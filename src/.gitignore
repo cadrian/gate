@@ -2,4 +2,4 @@ github.com
 code.google.com
 *_flymake.go
 *_flymake
-mock_*
+mocks

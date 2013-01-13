@@ -16,7 +16,7 @@
 package commands
 
 import (
-	server "gate/mock_server"
+	"gate/mocks"
 )
 
 import (
@@ -24,11 +24,17 @@ import (
 	"testing"
 )
 
-func TestRun(t *testing.T) {
+func TestGetRun(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := server.NewMockServer(ctrl)
+	mmi := mocks.NewMockUserInteraction(ctrl)
+	get := &cmd_get{nil, nil, mmi}
 
-	srv.EXPECT().Get("foo", gomock.Any())
+	mmi.EXPECT().XclipPassword("foo")
+
+	err := get.Run([]string{"foo"})
+	if err != nil {
+		t.Error(err)
+	}
 }
