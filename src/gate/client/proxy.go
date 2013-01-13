@@ -76,16 +76,16 @@ func startServer() (err error) {
 	return
 }
 
-func readNewMaster(config core.Config, reason string) (result string, err error) {
+func readNewMaster(mmi ui.UserInteraction, reason string) (result string, err error) {
 	var pass1, pass2, text string
 
 	text = fmt.Sprintf("%s,\nplease enter an encryption phrase.", reason)
 	for result == "" {
-		pass1, err = ui.ReadPassword(config, text)
+		pass1, err = mmi.ReadPassword(text)
 		if err != nil {
 			return
 		}
-		pass2, err = ui.ReadPassword(config, "Please enter the same encryption phrase again.")
+		pass2, err = mmi.ReadPassword("Please enter the same encryption phrase again.")
 		if err != nil {
 			return
 		}
@@ -115,14 +115,19 @@ func openVault(srv server.Server, config core.Config) (err error) {
 		return errors.Decorated(err)
 	}
 
+	mmi, err := ui.Ui(srv, config)
+	if err != nil {
+		return
+	}
+
 	var master string
 	if vault_info == nil {
-		master, err = readNewMaster(config, "This is a new vault")
+		master, err = readNewMaster(mmi, "This is a new vault")
 		if err != nil {
 			return
 		}
 	} else {
-		master, err = ui.ReadPassword(config, "Please enter your encryption phrase\nto open the password vault.")
+		master, err = mmi.ReadPassword("Please enter your encryption phrase\nto open the password vault.")
 		if err != nil {
 			return
 		}

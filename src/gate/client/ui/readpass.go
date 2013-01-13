@@ -16,7 +16,6 @@
 package ui
 
 import (
-	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
 )
@@ -27,8 +26,8 @@ import (
 	"os"
 )
 
-func ReadPassword(config core.Config, text string) (result string, err error) {
-	command, err := config.Eval("", "password", "command", os.Getenv)
+func (self *interaction) ReadPassword(text string) (result string, err error) {
+	command, err := self.config.Eval("", "password", "command", os.Getenv)
 	if err != nil {
 		return
 	}
@@ -39,7 +38,7 @@ func ReadPassword(config core.Config, text string) (result string, err error) {
 		}
 		return ""
 	}
-	arguments, err := config.Eval("", "password", "arguments", env)
+	arguments, err := self.config.Eval("", "password", "arguments", env)
 	if err != nil {
 		return
 	}

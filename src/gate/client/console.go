@@ -17,6 +17,7 @@ package client
 
 import (
 	"gate/client/commands"
+	"gate/client/ui"
 	"gate/core"
 	"gate/core/errors"
 	"gate/server"
@@ -109,7 +110,12 @@ Just hit [33m<enter>[0m to exit.
 		return
 	}
 
-	commands.Init(srv, config)
+	mmi, err := ui.Ui(srv, config)
+	if err != nil {
+		return
+	}
+
+	commands.Init(srv, config, mmi)
 
 	state := liner.NewLiner()
 	defer state.Close()

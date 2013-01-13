@@ -20,7 +20,6 @@ package ui
 import (
 	"gate/core/errors"
 	"gate/core/exec"
-	"gate/server"
 )
 
 import (
@@ -28,7 +27,7 @@ import (
 )
 
 // Copy the data string into the X clipboard (both primary and clipboard)
-func Xclip(data string) (err error) {
+func (self *interaction) Xclip(data string) (err error) {
 	err = xclip(data, "primary")
 	if err != nil {
 		return
@@ -43,14 +42,14 @@ func Xclip(data string) (err error) {
 }
 
 // Fetch the password from the server and xclips the corresponding password
-func XclipPassword(srv server.Server, name string) (err error) {
+func (self *interaction) XclipPassword(name string) (err error) {
 	var pass string
-	err = srv.Get(name, &pass)
+	err = self.server.Get(name, &pass)
 	if err != nil {
 		return
 	}
 
-	err = Xclip(pass)
+	err = self.Xclip(pass)
 
 	return
 }

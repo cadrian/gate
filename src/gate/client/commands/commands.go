@@ -16,6 +16,7 @@
 package commands
 
 import (
+	"gate/client/ui"
 	"gate/core"
 	"gate/core/errors"
 	"gate/server"
@@ -36,26 +37,27 @@ type Cmd interface {
 type cmd struct {
 	server server.Server
 	config core.Config
+	mmi ui.UserInteraction
 }
 
 var (
 	commands_map map[string]Cmd
 )
 
-func Init(srv server.Server, config core.Config) (err error) {
+func Init(srv server.Server, config core.Config, mmi ui.UserInteraction) (err error) {
 	commands_map = make(map[string]Cmd)
-	commands_map["add"] = &cmd_add{srv, config}
-	commands_map["help"] = &cmd_help{srv, config}
-	commands_map["list"] = &cmd_list{srv, config}
-	commands_map["load"] = &cmd_load{srv, config}
-	commands_map["master"] = &cmd_master{srv, config}
-	commands_map["merge"] = &cmd_merge{srv, config}
-	commands_map["rem"] = &cmd_rem{srv, config}
-	commands_map["remote"] = &cmd_remote{srv, config}
-	commands_map["save"] = &cmd_save{srv, config}
-	commands_map["show"] = &cmd_show{srv, config}
-	commands_map["stop"] = &cmd_stop{srv, config}
-	commands_map["get"] = &cmd_get{srv, config}
+	commands_map["add"] = &cmd_add{srv, config, mmi}
+	commands_map["help"] = &cmd_help{srv, config, mmi}
+	commands_map["list"] = &cmd_list{srv, config, mmi}
+	commands_map["load"] = &cmd_load{srv, config, mmi}
+	commands_map["master"] = &cmd_master{srv, config, mmi}
+	commands_map["merge"] = &cmd_merge{srv, config, mmi}
+	commands_map["rem"] = &cmd_rem{srv, config, mmi}
+	commands_map["remote"] = &cmd_remote{srv, config, mmi}
+	commands_map["save"] = &cmd_save{srv, config, mmi}
+	commands_map["show"] = &cmd_show{srv, config, mmi}
+	commands_map["stop"] = &cmd_stop{srv, config, mmi}
+	commands_map["get"] = &cmd_get{srv, config, mmi}
 	return
 }
 

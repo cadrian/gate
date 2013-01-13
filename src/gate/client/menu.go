@@ -32,7 +32,7 @@ import (
 	"os"
 )
 
-func clipboard(srv server.Server, out io.Reader, barrier chan error) {
+func clipboard(mmi ui.UserInteraction, out io.Reader, barrier chan error) {
 	buffer := &bytes.Buffer{}
 	n, err := buffer.ReadFrom(out)
 	if err != nil {
@@ -41,7 +41,8 @@ func clipboard(srv server.Server, out io.Reader, barrier chan error) {
 	}
 	name := string(buffer.Bytes()[:n-1])
 
-	err = ui.XclipPassword(srv, name)
+
+	err = mmi.XclipPassword(name)
 
 	if err == nil {
 		err = io.EOF
@@ -75,7 +76,12 @@ func displayMenu(config core.Config, srv server.Server, list []string) (err erro
 			return errors.Decorated(err)
 		}
 
-		go clipboard(srv, out, barrier)
+		mmi, err := ui.Ui(srv, config)
+		if err != nil {
+			return
+		}
+
+		go clipboard(mmi, out, barrier)
 
 		pipe <- p
 		return

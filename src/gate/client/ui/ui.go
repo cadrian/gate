@@ -13,34 +13,30 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package commands
+package ui
 
 import (
-	"fmt"
+	"gate/core"
+	"gate/server"
 )
 
-type cmd_get cmd
-
-var _ Cmd = &cmd_get{}
-
-func (self *cmd_get) Name() string {
-	return "get"
+type UserInteraction interface {
+	Xclip(data string) error
+	XclipPassword(name string) error
+	ReadPassword(text string) (string, error)
 }
 
-func (self *cmd_get) Run(line []string) (err error) {
-	err = self.mmi.XclipPassword(line[len(line)-1])
-	return
+type interaction struct {
+	server server.Server
+	config core.Config
 }
 
-func (self *cmd_get) Complete(line []string) (result []string, err error) {
-	var word string
-	if len(line) > 1 {
-		word = line[len(line)-1]
+var _ UserInteraction = &interaction{}
+
+func Ui(srv server.Server, config core.Config) (result UserInteraction, err error) {
+	result = &interaction {
+		server: srv,
+		config: config,
 	}
-	err = self.server.List(fmt.Sprintf("^%s", word), &result)
-	return
-}
-
-func (self *cmd_get) Help(line []string) (result string, err error) {
 	return
 }

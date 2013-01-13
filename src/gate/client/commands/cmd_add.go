@@ -16,7 +16,6 @@
 package commands
 
 import (
-	"gate/client/ui"
 	"gate/core/errors"
 	"gate/server"
 )
@@ -49,7 +48,7 @@ func (self *cmd_add) generateArgs(key string, recipe string) (result server.SetA
 }
 
 func (self *cmd_add) promptArgs(key string) (result server.SetArgs, err error) {
-	pass, err := ui.ReadPassword(self.config, fmt.Sprintf("Please enter the new password for %s", key))
+	pass, err := self.mmi.ReadPassword(fmt.Sprintf("Please enter the new password for %s", key))
 	if err != nil {
 		return
 	}
@@ -97,7 +96,7 @@ func (self *cmd_add) Run(line []string) (err error) {
 		return
 	}
 
-	err = ui.Xclip(pass)
+	err = self.mmi.Xclip(pass)
 	return
 }
 
