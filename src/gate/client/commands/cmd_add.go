@@ -103,6 +103,9 @@ func (self *cmd_add) Run(line []string) (err error) {
 
 func (self *cmd_add) Complete(line []string) (result []string, err error) {
 	switch len(line) {
+	case 2:
+		word := line[1]
+		err = self.server.List(fmt.Sprintf("^%s", word), &result)
 	case 3:
 		switch word := line[2]; {
 		case word == "":
