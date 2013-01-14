@@ -27,6 +27,17 @@ import (
 	"sort"
 )
 
+type Commander interface {
+	Command(name string) Cmd
+	Commands(filter string) ([]string, error)
+}
+
+type commander struct {
+	commands map[string]Cmd
+}
+
+var _ Commander = &commander{}
+
 type Cmd interface {
 	Name() string
 	Run(line []string) error
@@ -40,12 +51,8 @@ type cmd struct {
 	mmi ui.UserInteraction
 }
 
-var (
-	commands_map map[string]Cmd
-)
-
-func Init(srv server.Server, config core.Config, mmi ui.UserInteraction) (err error) {
-	commands_map = make(map[string]Cmd)
+func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
+	commands_map := make(map[string]Cmd)
 	commands_map["add"] = &cmd_add{srv, config, mmi}
 	commands_map["help"] = &cmd_help{srv, config, mmi}
 	commands_map["list"] = &cmd_list{srv, config, mmi}
@@ -58,25 +65,28 @@ func Init(srv server.Server, config core.Config, mmi ui.UserInteraction) (err er
 	commands_map["show"] = &cmd_show{srv, config, mmi}
 	commands_map["stop"] = &cmd_stop{srv, config, mmi}
 	commands_map["get"] = &cmd_get{srv, config, mmi}
+
+	result = &commander{commands_map}
+
 	return
 }
 
-func Command(name string) (result Cmd) {
-	result, ok := commands_map[name]
+func (self *commander) Command(name string) (result Cmd) {
+	result, ok := self.commands[name]
 	if !ok {
-		result = commands_map["get"]
+		result = self.commands["get"]
 	}
 	return
 }
 
-func Commands(filter string) (result []string, err error) {
+func (self *commander) Commands(filter string) (result []string, err error) {
 	re_filter, err := regexp.Compile(filter)
 	if err != nil {
 		err = errors.Decorated(err)
 		return
 	}
-	result = make([]string, 0, len(commands_map))
-	for _, cmd := range commands_map {
+	result = make([]string, 0, len(self.commands))
+	for _, cmd := range self.commands {
 		name := cmd.Name()
 		if re_filter.MatchString(name) {
 			result = append(result, name)

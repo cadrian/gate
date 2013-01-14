@@ -16,8 +16,10 @@
 package commands
 
 import (
+	"gate/client/ui"
+	"gate/server"
+	"gate/core"
 	"gate/core/errors"
-	"gate/mocks"
 )
 
 import (
@@ -30,9 +32,9 @@ func TestStopRun(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	stop := &cmd_stop{srv, cfg, mmi}
 
 	srv.EXPECT().Stop(0, gomock.Any()).Do(func (_ int, reply *bool) {
@@ -49,9 +51,9 @@ func TestStopRun_could_not_stop(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	stop := &cmd_stop{srv, cfg, mmi}
 
 	srv.EXPECT().Stop(0, gomock.Any()).Do(func (_ int, reply *bool) {

@@ -31,22 +31,23 @@ import (
 )
 
 type readline struct {
+	commander commands.Commander
 	server server.Server
 	state *liner.State
 	lastline string
 }
 
 func (self *readline) run(line []string) (err error) {
-	cmd := commands.Command(line[0])
+	cmd := self.commander.Command(line[0])
 	return cmd.Run(line)
 }
 
 func (self *readline) complete(line string) (result []string, err error) {
 	words := strings.Split(line, " ")
 	if len(words) == 1 {
-		return commands.Commands(fmt.Sprintf("^%s", words[0]))
+		return self.commander.Commands(fmt.Sprintf("^%s", words[0]))
 	}
-	cmd := commands.Command(words[0])
+	cmd := self.commander.Command(words[0])
 	candidates, err := cmd.Complete(words)
 	if err != nil {
 		return
@@ -115,12 +116,16 @@ Just hit [33m<enter>[0m to exit.
 		return
 	}
 
-	commands.Init(srv, config, mmi)
+	commander, err := commands.NewCommander(srv, config, mmi)
+	if err != nil {
+		return
+	}
 
 	state := liner.NewLiner()
 	defer state.Close()
 
 	rl := &readline {
+		commander: commander,
 		server: srv,
 		state: state,
 	}

@@ -16,7 +16,8 @@
 package commands
 
 import (
-	"gate/mocks"
+	"gate/client/ui"
+	"gate/core"
 	"gate/server"
 )
 
@@ -29,9 +30,9 @@ func TestAddRun2(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
 	cfg.EXPECT().Eval("", "console", "default_recipe", gomock.Any()).Return("recipe", nil)
@@ -53,9 +54,9 @@ func TestAddRun3Generate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
 	cfg.EXPECT().Eval("", "console", "default_recipe", gomock.Any()).Return("recipe", nil)
@@ -77,9 +78,9 @@ func TestAddRun3Prompt(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
 	mmi.EXPECT().ReadPassword("Please enter the new password for foo").Return("passwd", nil)
@@ -101,9 +102,9 @@ func TestAddRun4(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
 	args := server.SetArgs{Key:"foo", Recipe:"recipe"}

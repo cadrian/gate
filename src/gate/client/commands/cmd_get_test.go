@@ -16,7 +16,9 @@
 package commands
 
 import (
-	"gate/mocks"
+	"gate/client/ui"
+	"gate/core"
+	"gate/server"
 )
 
 import (
@@ -28,9 +30,9 @@ func TestGetRun1(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	get := &cmd_get{srv, cfg, mmi}
 
 	mmi.EXPECT().XclipPassword("foo")
@@ -45,9 +47,9 @@ func TestGetRun2(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-	mmi := mocks.NewMockUserInteraction(ctrl)
+	srv := server.NewMockServer(ctrl)
+	cfg := core.NewMockConfig(ctrl)
+	mmi := ui.NewMockUserInteraction(ctrl)
 	get := &cmd_get{srv, cfg, mmi}
 
 	mmi.EXPECT().XclipPassword("foo")
