@@ -50,5 +50,10 @@ func (self *cmd_stop) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_stop) Help(line []string) (result string, err error) {
+
+	result = `
+[33mstop[0m		      Stop the server and close the administration console.
+`
+
 	return
 }

@@ -69,7 +69,6 @@ If that key exists the password is stored in the clipboard.
 
 	self.mmi.Pager(fmt.Sprintf(`
 %s
-
 %s%s
 [1m--------[0m
 [32mGate Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>[0m
@@ -78,7 +77,7 @@ If that key exists the password is stored in the clipboard.
 [32munder certain conditions; type [33mshow c[32m for details.[0m
 `,
 		header,
-		strings.Join(help, "\n"),
+		strings.Join(help, ""),
 		extra,
 	))
 
@@ -90,5 +89,10 @@ func (self *cmd_help) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_help) Help(line []string) (result string, err error) {
+
+	result = `
+[33mhelp[0m		      Show this screen
+`
+
 	return
 }

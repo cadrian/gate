@@ -43,8 +43,8 @@ func TestHelpRun1(t *testing.T) {
 	cmd.EXPECT().Command("foo").Return(cmd_foo)
 	cmd.EXPECT().Command("bar").Return(cmd_bar)
 
-	cmd_foo.EXPECT().Help([]string{"help"}).Return("help for foo\n", nil)
-	cmd_bar.EXPECT().Help([]string{"help"}).Return("help for bar\n", nil)
+	cmd_foo.EXPECT().Help([]string{"help"}).Return("\nhelp for foo\n", nil)
+	cmd_bar.EXPECT().Help([]string{"help"}).Return("\nhelp for bar\n", nil)
 
 	mmi.EXPECT().Pager(`
 [1;32mKnown commands[0m
@@ -83,7 +83,7 @@ func TestHelpRun2(t *testing.T) {
 
 	cmd.EXPECT().Command("foo").Return(cmd_foo)
 
-	cmd_foo.EXPECT().Help([]string{"help", "foo"}).Return("help for foo\n", nil)
+	cmd_foo.EXPECT().Help([]string{"help", "foo"}).Return("\nhelp for foo\n", nil)
 
 	mmi.EXPECT().Pager(`
 [1;32mHelp for command foo[0m

@@ -105,5 +105,25 @@ func (self *cmd_add) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_add) Help(line []string) (result string, err error) {
+
+	result = `
+[33madd <key> [how][0m    Add a new password. Needs at least a key.
+		   If [33m[how][0m is "generate" then the password is
+		   randomly generated ([1mdefault[0m).
+		   If [33m[how][0m is "generate" with an extra argument then
+		   the extra argument represents a "recipe" used to generate
+		   the password (*).
+		   If [33m[how][0m is "prompt" then the password is asked.
+		   If the password already exists it is changed.
+		   In all cases the password is stored in the clipboard.
+
+		   (*) A recipe is a series of "ingredients" separated by a '+'.
+		   Each "ingredient" is an optional quantity (default 1)
+		   followed by a series of 'a' (alphanumeric), 'n' (numeric),
+		   or 's' (symbol).
+		   The password is generated using the recipe to randomly select
+		   characters, and mixing them.
+`
+
 	return
 }

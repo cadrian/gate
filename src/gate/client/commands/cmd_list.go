@@ -49,5 +49,10 @@ func (self *cmd_list) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_list) Help(line []string) (result string, err error) {
+
+	result = `
+[33mlist[0m		      List the known passwords (show only the keys).
+`
+
 	return
 }
