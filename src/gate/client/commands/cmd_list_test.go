@@ -30,7 +30,6 @@ func TestListRun1(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	list := &cmd_list{srv, cfg, mmi}
 

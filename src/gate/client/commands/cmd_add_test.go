@@ -31,7 +31,6 @@ func TestAddRun2(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
@@ -56,7 +55,6 @@ func TestAddRun3Generate(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
@@ -81,7 +79,6 @@ func TestAddRun3Prompt(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 
@@ -106,7 +103,6 @@ func TestAddRun4(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	add := &cmd_add{srv, cfg, mmi}
 

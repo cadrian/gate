@@ -30,7 +30,6 @@ func TestGetRun1(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	get := &cmd_get{srv, cfg, mmi}
 
@@ -48,7 +47,6 @@ func TestGetRun2(t *testing.T) {
 
 	srv := mocks.NewMockServer(ctrl)
 	cfg := mocks.NewMockConfig(ctrl)
-
 	mmi := mocks.NewMockUserInteraction(ctrl)
 	get := &cmd_get{srv, cfg, mmi}
 

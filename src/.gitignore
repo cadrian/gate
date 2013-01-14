@@ -3,3 +3,4 @@ code.google.com
 *_flymake.go
 *_flymake
 mocks
+*.test
