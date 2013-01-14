@@ -24,6 +24,7 @@ type UserInteraction interface {
 	Xclip(data string) error
 	XclipPassword(name string) error
 	ReadPassword(text string) (string, error)
+	Pager(text string) error
 }
 
 type interaction struct {

@@ -11,7 +11,7 @@ go get code.google.com/p/gomock/mockgen
 echo Testing
 TESTS=$(find src/gate -name \*_test.go -exec dirname {} \; | uniq | cut -c5-)
 
-mkdir -p src/gate/mocks
+rm -rf src/gate/mocks && mkdir -p src/gate/mocks
 while read pkg itf; do
     mockgen -package="mocks" $pkg $itf > src/gate/mocks/${pkg##*/}.go
 done <<EOF

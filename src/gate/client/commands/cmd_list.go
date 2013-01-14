@@ -16,7 +16,7 @@
 package commands
 
 import (
-	"fmt"
+	"strings"
 )
 
 type cmd_list cmd
@@ -39,10 +39,8 @@ func (self *cmd_list) Run(line []string) (err error) {
 	if err != nil {
 		return
 	}
-	// TODO call "less" instead of just printing
-	for _, name := range reply {
-		fmt.Printf("  * %s\n", name)
-	}
+
+	err = self.mmi.Pager(strings.Join(append(reply, ""), "\n"))
 	return
 }
 

@@ -13,34 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package commands
+package ui
 
 import (
-	"gate/mocks"
+	"fmt"
 )
 
-import (
-	"code.google.com/p/gomock/gomock"
-	"testing"
-)
-
-func TestListRun1(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	srv := mocks.NewMockServer(ctrl)
-	cfg := mocks.NewMockConfig(ctrl)
-
-	mmi := mocks.NewMockUserInteraction(ctrl)
-	list := &cmd_list{srv, cfg, mmi}
-
-	srv.EXPECT().List(".*", gomock.Any()).Do(func (filter string, reply *[]string) {
-		*reply = []string{"key1", "key2"}
-	})
-	mmi.EXPECT().Pager("key1\nkey2\n")
-
-	err := list.Run([]string{"list"})
-	if err != nil {
-		t.Error(err)
-	}
+func (self *interaction) Pager(text string) (err error) {
+	// TODO call "less" instead of just printing
+	fmt.Printf("%s", text)
+	return
 }
