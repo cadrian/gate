@@ -23,6 +23,7 @@ import (
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type cmd_add cmd
@@ -101,6 +102,17 @@ func (self *cmd_add) Run(line []string) (err error) {
 }
 
 func (self *cmd_add) Complete(line []string) (result []string, err error) {
+	switch len(line) {
+	case 3:
+		switch word := line[2]; {
+		case word == "":
+			result = []string{"generate", "prompt"}
+		case strings.HasPrefix("generate", word):
+			result = []string{"generate"}
+		case strings.HasPrefix("prompt", word):
+			result = []string{"prompt"}
+		}
+	}
 	return
 }
 
