@@ -56,6 +56,7 @@ func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction)
 	cmd := &commander{
 		commands: make(map[string]Cmd),
 	}
+	result = cmd
 
 	cmd.commands["add"] = &cmd_add{result, srv, config, mmi}
 	cmd.commands["help"] = &cmd_help{result, srv, config, mmi}
@@ -69,8 +70,6 @@ func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction)
 	cmd.commands["show"] = &cmd_show{result, srv, config, mmi}
 	cmd.commands["stop"] = &cmd_stop{result, srv, config, mmi}
 	cmd.commands["get"] = &cmd_get{result, srv, config, mmi}
-
-	result = cmd
 
 	return
 }
