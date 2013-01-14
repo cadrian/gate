@@ -29,6 +29,8 @@ func (self *interaction) Pager(text string) (err error) {
 	pipe := make(chan io.WriteCloser, 1)
 
 	prepare := func (cmd *exec.Cmd) (err error) {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 		p, err := cmd.StdinPipe()
 		if err != nil {
 			return errors.Decorated(err)
@@ -47,11 +49,6 @@ func (self *interaction) Pager(text string) (err error) {
 		return
 	}
 
-	pager := os.Getenv("PAGER")
-	if pager == "" {
-		pager = "less"
-	}
-
-	err = exec.Command(prepare, run, pager) // TODO use os.Process instead (we need the tty)
+	err = exec.Command(prepare, run, "less", "-R") // TODO use os.Process instead (we need the tty)
 	return
 }
