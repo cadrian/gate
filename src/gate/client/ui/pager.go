@@ -16,11 +16,42 @@
 package ui
 
 import (
-	"fmt"
+	"gate/core/errors"
+	"gate/core/exec"
+)
+
+import (
+	"io"
+	"os"
 )
 
 func (self *interaction) Pager(text string) (err error) {
-	// TODO call "less" instead of just printing
-	fmt.Printf("%s", text)
+	pipe := make(chan io.WriteCloser, 1)
+
+	prepare := func (cmd *exec.Cmd) (err error) {
+		p, err := cmd.StdinPipe()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		pipe <- p
+		return
+	}
+
+	run := func (cmd *exec.Cmd) (err error) {
+		p := <-pipe
+		p.Write([]byte(text))
+		err = p.Close()
+		if err != nil {
+			return errors.Decorated(err)
+		}
+		return
+	}
+
+	pager := os.Getenv("PAGER")
+	if pager == "" {
+		pager = "less"
+	}
+
+	err = exec.Command(prepare, run, pager) // TODO use os.Process instead (we need the tty)
 	return
 }
