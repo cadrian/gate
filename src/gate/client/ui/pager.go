@@ -49,6 +49,6 @@ func (self *interaction) Pager(text string) (err error) {
 		return
 	}
 
-	err = exec.Command(prepare, run, "less", "-R") // TODO use os.Process instead (we need the tty)
+	err = exec.Command(prepare, run, "less", "-R")
 	return
 }
