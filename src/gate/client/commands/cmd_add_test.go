@@ -30,10 +30,11 @@ func TestAddRun2(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	add := &cmd_add{srv, cfg, mmi}
+	add := &cmd_add{cmd, srv, cfg, mmi}
 
 	cfg.EXPECT().Eval("", "console", "default_recipe", gomock.Any()).Return("recipe", nil)
 	args := server.SetArgs{Key:"foo", Recipe:"recipe"}
@@ -54,10 +55,11 @@ func TestAddRun3Generate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	add := &cmd_add{srv, cfg, mmi}
+	add := &cmd_add{cmd, srv, cfg, mmi}
 
 	cfg.EXPECT().Eval("", "console", "default_recipe", gomock.Any()).Return("recipe", nil)
 	args := server.SetArgs{Key:"foo", Recipe:"recipe"}
@@ -78,10 +80,11 @@ func TestAddRun3Prompt(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	add := &cmd_add{srv, cfg, mmi}
+	add := &cmd_add{cmd, srv, cfg, mmi}
 
 	mmi.EXPECT().ReadPassword("Please enter the new password for foo").Return("passwd", nil)
 	args := server.SetArgs{Key:"foo", Pass:"passwd"}
@@ -102,10 +105,11 @@ func TestAddRun4(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	add := &cmd_add{srv, cfg, mmi}
+	add := &cmd_add{cmd, srv, cfg, mmi}
 
 	args := server.SetArgs{Key:"foo", Recipe:"recipe"}
 

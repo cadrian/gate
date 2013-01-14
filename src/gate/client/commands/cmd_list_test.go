@@ -30,10 +30,11 @@ func TestListRun1(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	list := &cmd_list{srv, cfg, mmi}
+	list := &cmd_list{cmd, srv, cfg, mmi}
 
 	srv.EXPECT().List(".*", gomock.Any()).Do(func (filter string, reply *[]string) {
 		*reply = []string{"key1", "key2"}

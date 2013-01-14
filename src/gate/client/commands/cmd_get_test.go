@@ -30,10 +30,11 @@ func TestGetRun1(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	get := &cmd_get{srv, cfg, mmi}
+	get := &cmd_get{cmd, srv, cfg, mmi}
 
 	mmi.EXPECT().XclipPassword("foo")
 
@@ -47,10 +48,11 @@ func TestGetRun2(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	get := &cmd_get{srv, cfg, mmi}
+	get := &cmd_get{cmd, srv, cfg, mmi}
 
 	mmi.EXPECT().XclipPassword("foo")
 

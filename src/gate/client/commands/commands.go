@@ -46,27 +46,31 @@ type Cmd interface {
 }
 
 type cmd struct {
+	commander Commander
 	server server.Server
 	config core.Config
 	mmi ui.UserInteraction
 }
 
 func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
-	commands_map := make(map[string]Cmd)
-	commands_map["add"] = &cmd_add{srv, config, mmi}
-	commands_map["help"] = &cmd_help{srv, config, mmi}
-	commands_map["list"] = &cmd_list{srv, config, mmi}
-	commands_map["load"] = &cmd_load{srv, config, mmi}
-	commands_map["master"] = &cmd_master{srv, config, mmi}
-	commands_map["merge"] = &cmd_merge{srv, config, mmi}
-	commands_map["rem"] = &cmd_rem{srv, config, mmi}
-	commands_map["remote"] = &cmd_remote{srv, config, mmi}
-	commands_map["save"] = &cmd_save{srv, config, mmi}
-	commands_map["show"] = &cmd_show{srv, config, mmi}
-	commands_map["stop"] = &cmd_stop{srv, config, mmi}
-	commands_map["get"] = &cmd_get{srv, config, mmi}
+	cmd := &commander{
+		commands: make(map[string]Cmd),
+	}
 
-	result = &commander{commands_map}
+	cmd.commands["add"] = &cmd_add{result, srv, config, mmi}
+	cmd.commands["help"] = &cmd_help{result, srv, config, mmi}
+	cmd.commands["list"] = &cmd_list{result, srv, config, mmi}
+	cmd.commands["load"] = &cmd_load{result, srv, config, mmi}
+	cmd.commands["master"] = &cmd_master{result, srv, config, mmi}
+	cmd.commands["merge"] = &cmd_merge{result, srv, config, mmi}
+	cmd.commands["rem"] = &cmd_rem{result, srv, config, mmi}
+	cmd.commands["remote"] = &cmd_remote{result, srv, config, mmi}
+	cmd.commands["save"] = &cmd_save{result, srv, config, mmi}
+	cmd.commands["show"] = &cmd_show{result, srv, config, mmi}
+	cmd.commands["stop"] = &cmd_stop{result, srv, config, mmi}
+	cmd.commands["get"] = &cmd_get{result, srv, config, mmi}
+
+	result = cmd
 
 	return
 }

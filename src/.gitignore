@@ -2,5 +2,5 @@ github.com
 code.google.com
 *_flymake.go
 *_flymake
-_mocks_test.go
+mocks.go
 *.test

@@ -32,10 +32,11 @@ func TestStopRun(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	stop := &cmd_stop{srv, cfg, mmi}
+	stop := &cmd_stop{cmd, srv, cfg, mmi}
 
 	srv.EXPECT().Stop(0, gomock.Any()).Do(func (_ int, reply *bool) {
 		*reply = true
@@ -51,10 +52,11 @@ func TestStopRun_could_not_stop(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cmd := NewMockCommander(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	stop := &cmd_stop{srv, cfg, mmi}
+	stop := &cmd_stop{cmd, srv, cfg, mmi}
 
 	srv.EXPECT().Stop(0, gomock.Any()).Do(func (_ int, reply *bool) {
 		*reply = false

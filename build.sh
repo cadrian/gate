@@ -9,11 +9,11 @@ go get code.google.com/p/gomock/gomock
 go get code.google.com/p/gomock/mockgen
 
 echo Testing
-TESTS=$(find src/gate \( -name \*_test.go ! -name _mocks_test.go \) -exec dirname {} \; | uniq | cut -c5-)
+find src -name mocks.go -exec rm {} +
+TESTS=$(find src/gate -name \*_test.go -exec dirname {} \; | uniq | cut -c5-)
 
-find src -name _mocks_test.go -exec rm {} +
 while read pkg itf; do
-    mockgen -self_package=$pkg -package=$(basename $pkg) -destination=src/$pkg/_mocks_test.go $pkg $itf
+    mockgen -self_package=$pkg -package=$(basename $pkg) -destination=src/$pkg/mocks.go $pkg $itf
 done <<EOF
 gate/server Server
 gate/client/commands Commander,Cmd
