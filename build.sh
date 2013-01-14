@@ -7,6 +7,7 @@ echo Fetching deps
 go get github.com/sbinet/liner
 go get code.google.com/p/gomock/gomock
 go get code.google.com/p/gomock/mockgen
+go get code.google.com/p/go.crypto/scrypt
 
 echo Testing
 find src -name mocks.go -exec rm {} +
