@@ -22,7 +22,7 @@ import (
 
 type cmd_help cmd
 
-var _ Cmd = &cmd_help{}
+var _ Command = &cmd_help{}
 
 func (self *cmd_help) Name() string {
 	return "help"

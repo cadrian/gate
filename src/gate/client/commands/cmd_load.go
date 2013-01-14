@@ -17,7 +17,7 @@ package commands
 
 type cmd_load cmd
 
-var _ Cmd = &cmd_load{}
+var _ Command = &cmd_load{}
 
 func (self *cmd_load) Name() string {
 	return "load"
@@ -32,5 +32,13 @@ func (self *cmd_load) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_load) Help(line []string) (result string, err error) {
+
+	result = `
+[33mload [remote][0m      [1mReplace[0m the local vault with the server's version.
+		   Note: in that case you will be asked for the new vault
+		   password (the previous vault is closed).
+		   [33m[remote][0m: see note below
+`
+
 	return
 }

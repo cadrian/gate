@@ -21,7 +21,7 @@ import (
 
 type cmd_list cmd
 
-var _ Cmd = &cmd_list{}
+var _ Command = &cmd_list{}
 
 func (self *cmd_list) Name() string {
 	return "list"

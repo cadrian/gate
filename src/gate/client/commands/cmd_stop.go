@@ -25,7 +25,7 @@ import (
 
 type cmd_stop cmd
 
-var _ Cmd = &cmd_stop{}
+var _ Command = &cmd_stop{}
 
 func (self *cmd_stop) Name() string {
 	return "stop"

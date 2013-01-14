@@ -13,24 +13,46 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package commands
+package remote
 
-type cmd_rem cmd
-
-var _ Command = &cmd_rem{}
-
-func (self *cmd_rem) Name() string {
-	return "rem"
+type Remoter interface {
+	Remote(name string) (Remote, error)
 }
 
-func (self *cmd_rem) Run(line []string) (err error) {
-	return
+type remoter struct {
+	remotes map[string]Remote
 }
 
-func (self *cmd_rem) Complete(line []string) (result []string, err error) {
-	return
+type Remote interface {
+	Name() string
+
+	Load(file string) error
+	Save(file string) error
+
+	Proxy() (Proxy, error)
+
+	SetProperty(key, value string) error
+	ResetProperty(key string) error
 }
 
-func (self *cmd_rem) Help(line []string) (result string, err error) {
-	return
+type remote struct {
+	remoter remoter
+	name string
+	properties map[string]string
+	proxy Proxy
+}
+
+type Proxy interface {
+	IsInstalled() bool
+	Install()
+	Remove()
+
+	SetProperty(key, value string) error
+	ResetProperty(key string) error
+
+	url() string
+}
+
+type proxy struct {
+	properties map[string]string
 }

@@ -17,7 +17,8 @@ while read pkg itf; do
     mockgen -self_package=$pkg -package=$(basename $pkg) -destination=src/$pkg/mocks.go $pkg $itf
 done <<EOF
 gate/server Server
-gate/client/commands Commander,Cmd
+gate/client/commands Commander,Command
+gate/client/remote Remoter,Remote,Proxy
 gate/client/ui UserInteraction
 gate/core Config
 EOF

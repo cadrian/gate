@@ -28,7 +28,7 @@ import (
 
 type cmd_add cmd
 
-var _ Cmd = &cmd_add{}
+var _ Command = &cmd_add{}
 
 func (self *cmd_add) Name() string {
 	return "add"

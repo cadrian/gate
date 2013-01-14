@@ -17,7 +17,7 @@ package commands
 
 type cmd_remote cmd
 
-var _ Cmd = &cmd_remote{}
+var _ Command = &cmd_remote{}
 
 func (self *cmd_remote) Name() string {
 	return "remote"

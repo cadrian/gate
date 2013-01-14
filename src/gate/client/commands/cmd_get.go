@@ -21,7 +21,7 @@ import (
 
 type cmd_get cmd
 
-var _ Cmd = &cmd_get{}
+var _ Command = &cmd_get{}
 
 func (self *cmd_get) Name() string {
 	return "get"

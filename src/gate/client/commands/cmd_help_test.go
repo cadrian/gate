@@ -36,8 +36,8 @@ func TestHelpRun1(t *testing.T) {
 	mmi := ui.NewMockUserInteraction(ctrl)
 	help := &cmd_help{cmd, srv, cfg, mmi}
 
-	cmd_foo := NewMockCmd(ctrl)
-	cmd_bar := NewMockCmd(ctrl)
+	cmd_foo := NewMockCommand(ctrl)
+	cmd_bar := NewMockCommand(ctrl)
 
 	cmd.EXPECT().Commands(".*").Return([]string{"foo", "bar"}, nil)
 	cmd.EXPECT().Command("foo").Return(cmd_foo)
@@ -79,7 +79,7 @@ func TestHelpRun2(t *testing.T) {
 	mmi := ui.NewMockUserInteraction(ctrl)
 	help := &cmd_help{cmd, srv, cfg, mmi}
 
-	cmd_foo := NewMockCmd(ctrl)
+	cmd_foo := NewMockCommand(ctrl)
 
 	cmd.EXPECT().Command("foo").Return(cmd_foo)
 

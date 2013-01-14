@@ -17,7 +17,7 @@ package commands
 
 type cmd_show cmd
 
-var _ Cmd = &cmd_show{}
+var _ Command = &cmd_show{}
 
 func (self *cmd_show) Name() string {
 	return "show"

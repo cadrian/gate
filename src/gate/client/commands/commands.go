@@ -28,17 +28,17 @@ import (
 )
 
 type Commander interface {
-	Command(name string) Cmd
+	Command(name string) Command
 	Commands(filter string) ([]string, error)
 }
 
 type commander struct {
-	commands map[string]Cmd
+	commands map[string]Command
 }
 
 var _ Commander = &commander{}
 
-type Cmd interface {
+type Command interface {
 	Name() string
 	Run(line []string) error
 	Complete(line []string) ([]string, error)
@@ -54,7 +54,7 @@ type cmd struct {
 
 func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
 	cmd := &commander{
-		commands: make(map[string]Cmd),
+		commands: make(map[string]Command),
 	}
 	result = cmd
 
@@ -74,7 +74,7 @@ func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction)
 	return
 }
 
-func (self *commander) Command(name string) (result Cmd) {
+func (self *commander) Command(name string) (result Command) {
 	result, ok := self.commands[name]
 	if !ok {
 		result = self.commands["get"]

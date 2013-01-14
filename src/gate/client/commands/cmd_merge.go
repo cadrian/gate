@@ -17,7 +17,7 @@ package commands
 
 type cmd_merge cmd
 
-var _ Cmd = &cmd_merge{}
+var _ Command = &cmd_merge{}
 
 func (self *cmd_merge) Name() string {
 	return "merge"

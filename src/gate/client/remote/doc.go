@@ -13,24 +13,5 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package commands
-
-type cmd_rem cmd
-
-var _ Command = &cmd_rem{}
-
-func (self *cmd_rem) Name() string {
-	return "rem"
-}
-
-func (self *cmd_rem) Run(line []string) (err error) {
-	return
-}
-
-func (self *cmd_rem) Complete(line []string) (result []string, err error) {
-	return
-}
-
-func (self *cmd_rem) Help(line []string) (result string, err error) {
-	return
-}
+// Remote vaults management
+package remote

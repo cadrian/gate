@@ -17,7 +17,7 @@ package commands
 
 type cmd_save cmd
 
-var _ Cmd = &cmd_save{}
+var _ Command = &cmd_save{}
 
 func (self *cmd_save) Name() string {
 	return "save"

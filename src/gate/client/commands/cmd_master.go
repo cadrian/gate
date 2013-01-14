@@ -17,7 +17,7 @@ package commands
 
 type cmd_master cmd
 
-var _ Cmd = &cmd_master{}
+var _ Command = &cmd_master{}
 
 func (self *cmd_master) Name() string {
 	return "master"
