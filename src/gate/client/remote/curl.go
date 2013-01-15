@@ -19,9 +19,11 @@ package remote
 
 import (
 	"gate/core/errors"
+	"gate/server"
 )
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -31,12 +33,13 @@ var _ Remote = &curl{}
 
 var CurlAllowedKeys []string = []string{}
 
-func newCurl(name string, remoter Remoter) Remote {
+func newCurl(name string, srv server.Server, remoter Remoter) Remote {
 	return &curl {
 		properties {
 			allowed: CurlAllowedKeys,
 			properties: make(map[string]string),
 		},
+		srv,
 		remoter,
 		name,
 		nil,
@@ -45,6 +48,33 @@ func newCurl(name string, remoter Remoter) Remote {
 
 func (self *curl) Name() string {
 	return self.name
+}
+
+func (self *curl) arguments(option, file, request string) (result []string, err error) {
+	url := self.getProperty("url")
+	if url == "" {
+		err = errors.Newf("missing remote vault url")
+		return
+	}
+	result = []string{"-#", option, file, url}
+	user := self.getProperty("user")
+	passkey := self.getProperty("passkey")
+	if user != "" {
+		if passkey == "" {
+			result = append(result, "-u", user)
+		} else {
+			var pass string
+			err = self.server.Get(passkey, &pass)
+			if err != nil {
+				return
+			}
+			result = append(result, "-u", fmt.Sprintf("%s:%s", user, escape_pass_url(pass)))
+		}
+	}
+	if request != "" {
+		result = append(result, "--request", request)
+	}
+	return
 }
 
 func (self *curl) LoadVault(file string) (err error) {

@@ -19,6 +19,7 @@ import (
 	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
+	"gate/server"
 )
 
 import (
@@ -51,6 +52,7 @@ type Remote interface {
 
 type remote struct {
 	properties
+	server server.Server
 	remoter Remoter
 	name string
 	proxy Proxy
@@ -78,4 +80,23 @@ func (self *remoter) Remote(name string) (result Remote, err error) {
 		err = errors.Newf("Unknown remote: %s", name)
 	}
 	return
+}
+
+func escape_pass_url(data string) string {
+	buffer := make([]byte, 0, 3 * len(data))
+	for _, b := range []byte(data) {
+		switch b {
+		case ' ':
+			buffer = append(buffer, []byte("%20")...)
+		case '%':
+			buffer = append(buffer, []byte("%25")...)
+		case ':':
+			buffer = append(buffer, []byte("%3A")...)
+		case '@':
+			buffer = append(buffer, []byte("%40")...)
+		default:
+			buffer = append(buffer, b)
+		}
+	}
+	return string(buffer)
 }

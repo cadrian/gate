@@ -45,25 +45,6 @@ func newProxy() Proxy {
 	}
 }
 
-func escape(data string) string {
-	buffer := make([]byte, 0, 3 * len(data))
-	for _, b := range []byte(data) {
-		switch b {
-		case ' ':
-			buffer = append(buffer, []byte("%20")...)
-		case '%':
-			buffer = append(buffer, []byte("%25")...)
-		case ':':
-			buffer = append(buffer, []byte("%3A")...)
-		case '@':
-			buffer = append(buffer, []byte("%40")...)
-		default:
-			buffer = append(buffer, b)
-		}
-	}
-	return string(buffer)
-}
-
 func (self *proxy) Install(cmd *exec.Cmd) (err error) {
 	var (
 		url string
@@ -77,7 +58,7 @@ func (self *proxy) Install(cmd *exec.Cmd) (err error) {
 		if pass == "" {
 			url = fmt.Sprintf("%s@%s", user, host)
 		} else {
-			url = fmt.Sprintf("%s:%s@%s", user, escape(pass), host)
+			url = fmt.Sprintf("%s:%s@%s", user, escape_pass_url(pass), host)
 		}
 	}
 	port := self.getProperty("port")
