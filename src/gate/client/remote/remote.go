@@ -15,44 +15,67 @@
 
 package remote
 
+import (
+	"gate/core"
+	"gate/core/errors"
+	"gate/core/exec"
+)
+
+import (
+	"io"
+)
+
 type Remoter interface {
 	Remote(name string) (Remote, error)
 }
 
 type remoter struct {
+	config core.Config
 	remotes map[string]Remote
 }
+
+var _ Remoter = &remoter{}
 
 type Remote interface {
 	Name() string
 
-	Load(file string) error
-	Save(file string) error
+	LoadVault(file string) error
+	SaveVault(file string) error
 
-	Proxy() (Proxy, error)
+	Proxy() Proxy
 
 	SetProperty(key, value string) error
 	ResetProperty(key string) error
+	StoreProperties(io.Writer) error
 }
 
 type remote struct {
-	remoter remoter
+	properties
+	remoter Remoter
 	name string
-	properties map[string]string
 	proxy Proxy
 }
 
 type Proxy interface {
-	IsInstalled() bool
-	Install()
-	Remove()
+	Install(cmd *exec.Cmd) error
 
 	SetProperty(key, value string) error
 	ResetProperty(key string) error
-
-	url() string
+	StoreProperties(io.Writer) error
 }
 
-type proxy struct {
-	properties map[string]string
+func NewRemoter(config core.Config) Remoter {
+	return &remoter {
+		config: config,
+		remotes: make(map[string]Remote, 32),
+	}
+}
+
+func (self *remoter) Remote(name string) (result Remote, err error) {
+	result, ok := self.remotes[name]
+	if !ok {
+		// TODO try and load it
+		err = errors.Newf("Unknown remote: %s", name)
+	}
+	return
 }
