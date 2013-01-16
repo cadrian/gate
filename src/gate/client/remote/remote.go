@@ -87,7 +87,7 @@ func (self *remoter) Remote(name string) (result Remote, err error) {
 }
 
 func (self *remoter) readRemote(name string) (result Remote, err error) {
-	method, err := self.config.Eval(name + ".rc", "", "method", nil)
+	method, err := self.config.Eval(name + ".rc", "remote", "method", nil)
 	if err != nil {
 		return
 	}
