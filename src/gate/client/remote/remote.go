@@ -31,6 +31,7 @@ type Remoter interface {
 }
 
 type remoter struct {
+	server server.Server
 	config core.Config
 	remotes map[string]Remote
 }
@@ -66,8 +67,9 @@ type Proxy interface {
 	StoreProperties(io.Writer) error
 }
 
-func NewRemoter(config core.Config) Remoter {
+func NewRemoter(srv server.Server, config core.Config) Remoter {
 	return &remoter {
+		server: srv,
 		config: config,
 		remotes: make(map[string]Remote, 32),
 	}
@@ -76,8 +78,26 @@ func NewRemoter(config core.Config) Remoter {
 func (self *remoter) Remote(name string) (result Remote, err error) {
 	result, ok := self.remotes[name]
 	if !ok {
-		// TODO try and load it
+		result, err = self.readRemote(name)
+		if err == nil {
+			self.remotes[name] = result
+		}
+	}
+	return
+}
+
+func (self *remoter) readRemote(name string) (result Remote, err error) {
+	method, err := self.config.Eval(name + ".rc", "", "method", nil)
+	if err != nil {
+		return
+	}
+	switch method {
+	case "curl":
+		result, err = newCurl(name, self.server, self.config, self)
+	case "":
 		err = errors.Newf("Unknown remote: %s", name)
+	default:
+		err = errors.Newf("Unknown remote method: %s", method)
 	}
 	return
 }

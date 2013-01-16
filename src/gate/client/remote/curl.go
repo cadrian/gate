@@ -18,23 +18,26 @@ package remote
 // Curl remote
 
 import (
+	"gate/core"
 	"gate/core/errors"
+	"gate/core/exec"
 	"gate/server"
 )
 
 import (
 	"fmt"
 	"io"
+	"os"
 )
 
 type curl remote
 
 var _ Remote = &curl{}
 
-var CurlAllowedKeys []string = []string{}
+var CurlAllowedKeys []string = []string{"url", "user", "passkey", "put_request", "get_request"}
 
-func newCurl(name string, srv server.Server, remoter Remoter) Remote {
-	return &curl {
+func newCurl(name string, srv server.Server, config core.Config, remoter Remoter) (Remote, error) {
+	result := &curl {
 		properties {
 			allowed: CurlAllowedKeys,
 			properties: make(map[string]string),
@@ -44,6 +47,17 @@ func newCurl(name string, srv server.Server, remoter Remoter) Remote {
 		name,
 		nil,
 	}
+	file := name + ".rc"
+	for _, key := range CurlAllowedKeys {
+		value, err := config.Eval(file, "", key, nil)
+		if err != nil {
+			return nil, err
+		}
+		if value != "" {
+			result.properties.setProperty(key, value)
+		}
+	}
+	return result, nil
 }
 
 func (self *curl) Name() string {
@@ -77,12 +91,37 @@ func (self *curl) arguments(option, file, request string) (result []string, err 
 	return
 }
 
-func (self *curl) LoadVault(file string) (err error) {
+func (self *curl) doCurl(option, file, request string) (err error) {
+	args, err := self.arguments(option, file, request)
+	if err != nil {
+		return
+	}
+
+	prepare := func (cmd *exec.Cmd) (err error) {
+		if self.proxy != nil {
+			self.proxy.Install(cmd)
+		}
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return
+	}
+
+	run := func (cmd *exec.Cmd) (err error) {
+		return
+	}
+
+	err = exec.Command(prepare, run, "curl", args...)
+
 	return
 }
 
-func (self *curl) SaveVault(file string) (err error) {
-	return
+func (self *curl) LoadVault(file string) error {
+	return self.doCurl("-o", file, self.getProperty("get_request"))
+}
+
+func (self *curl) SaveVault(file string) error {
+	return self.doCurl("-T", file, self.getProperty("put_request"))
 }
 
 func (self *curl) Proxy() Proxy {
