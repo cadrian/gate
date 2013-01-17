@@ -59,12 +59,12 @@ func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction)
 	result = cmd
 
 	cmd.commands["add"] = &cmd_add{result, srv, config, mmi}
+	cmd.commands["del"] = &cmd_del{result, srv, config, mmi}
 	cmd.commands["help"] = &cmd_help{result, srv, config, mmi}
 	cmd.commands["list"] = &cmd_list{result, srv, config, mmi}
 	cmd.commands["load"] = &cmd_load{result, srv, config, mmi}
 	cmd.commands["master"] = &cmd_master{result, srv, config, mmi}
 	cmd.commands["merge"] = &cmd_merge{result, srv, config, mmi}
-	cmd.commands["rem"] = &cmd_rem{result, srv, config, mmi}
 	cmd.commands["remote"] = &cmd_remote{result, srv, config, mmi}
 	cmd.commands["save"] = &cmd_save{result, srv, config, mmi}
 	cmd.commands["show"] = &cmd_show{result, srv, config, mmi}

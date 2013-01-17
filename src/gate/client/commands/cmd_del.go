@@ -15,22 +15,22 @@
 
 package commands
 
-type cmd_rem cmd
+type cmd_del cmd
 
-var _ Command = &cmd_rem{}
+var _ Command = &cmd_del{}
 
-func (self *cmd_rem) Name() string {
-	return "rem"
+func (self *cmd_del) Name() string {
+	return "del"
 }
 
-func (self *cmd_rem) Run(line []string) (err error) {
+func (self *cmd_del) Run(line []string) (err error) {
 	return
 }
 
-func (self *cmd_rem) Complete(line []string) (result []string, err error) {
+func (self *cmd_del) Complete(line []string) (result []string, err error) {
 	return
 }
 
-func (self *cmd_rem) Help(line []string) (result string, err error) {
+func (self *cmd_del) Help(line []string) (result string, err error) {
 	return
 }
