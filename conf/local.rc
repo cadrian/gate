@@ -1,0 +1,12 @@
+#
+# This example configuration file sets a local backup vault file
+#
+
+######################################################################
+[remote]
+
+# Method of transfer. Currently available methods are "curl" and "scp"
+method       = curl
+
+# Url is a local file.
+url          = file://$HOME/.vault

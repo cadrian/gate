@@ -1,0 +1,21 @@
+#
+# This example configuration file sets a web-saved remote vault using scp
+#
+
+######################################################################
+[remote]
+
+# Method of transfer. Currently available methods are "curl" and "scp"
+method       = scp
+
+# Name of the user. May be blank.
+user         = cadrian
+
+# Name of the remote host. Mandatory.
+host         = localhost
+
+# Path of the vault on the remote host. Mandatory.
+file         = $HOME/.scp_vault
+
+# Extra scp options.
+options      =
