@@ -27,13 +27,20 @@ import (
 	"sort"
 )
 
+type CompositeCommand interface {
+	Command
+	Commander
+}
+
 type Commander interface {
 	Command(name string) Command
+	Default() Command
 	Commands(filter string) ([]string, error)
 }
 
 type commander struct {
 	commands map[string]Command
+	defcmd string
 }
 
 var _ Commander = &commander{}
@@ -55,6 +62,7 @@ type cmd struct {
 func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
 	cmd := &commander{
 		commands: make(map[string]Command),
+		defcmd: "get",
 	}
 	result = cmd
 
@@ -65,7 +73,7 @@ func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction)
 	cmd.commands["load"] = &cmd_load{result, srv, config, mmi}
 	cmd.commands["master"] = &cmd_master{result, srv, config, mmi}
 	cmd.commands["merge"] = &cmd_merge{result, srv, config, mmi}
-	cmd.commands["remote"] = &cmd_remote{result, srv, config, mmi}
+	cmd.commands["remote"] = newRemote(result, srv, config, mmi)
 	cmd.commands["save"] = &cmd_save{result, srv, config, mmi}
 	cmd.commands["show"] = &cmd_show{result, srv, config, mmi}
 	cmd.commands["stop"] = &cmd_stop{result, srv, config, mmi}
@@ -75,11 +83,12 @@ func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction)
 }
 
 func (self *commander) Command(name string) (result Command) {
-	result, ok := self.commands[name]
-	if !ok {
-		result = self.commands["get"]
-	}
+	result, _ = self.commands[name]
 	return
+}
+
+func (self *commander) Default() Command {
+	return self.commands[self.defcmd]
 }
 
 func (self *commander) Commands(filter string) (result []string, err error) {

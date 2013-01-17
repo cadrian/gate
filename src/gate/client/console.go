@@ -39,6 +39,9 @@ type readline struct {
 
 func (self *readline) run(line []string) (err error) {
 	cmd := self.commander.Command(line[0])
+	if cmd == nil {
+		cmd = self.commander.Default()
+	}
 	return cmd.Run(line)
 }
 
