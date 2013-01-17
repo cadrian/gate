@@ -22,10 +22,19 @@ import (
 	"gate/core/rc"
 )
 
+import (
+	"os"
+	"strings"
+)
+
 // An object mirroring the user configuration
 type Config interface {
 	// Get a configuration value; may be transformed by the evaluator (e.g. os.Getenv).
 	Eval(file string, section string, key string, evaluator func(string) string) (string, error)
+
+	// Get the list of extra configuration files, directly useable as first argument of Eval()
+	// "config.rc" itself is ommitted
+	ListConfigFiles() ([]string, error)
 }
 
 type config struct {
@@ -36,6 +45,34 @@ type config struct {
 func NewConfig() (result Config, err error) {
 	result = &config{
 		files: make(map[string]*rc.File),
+	}
+	return
+}
+
+func (self *config) ListConfigFiles() (result []string, err error) {
+	xdg, err := Xdg()
+	if err != nil {
+		return
+	}
+	config_path, err := xdg.ConfigHome()
+	if err != nil {
+		return
+	}
+	config, err := os.Open(config_path)
+	if err != nil {
+		err = errors.Decorated(err)
+		return
+	}
+	names, err := config.Readdirnames(0)
+	if err != nil {
+		err = errors.Decorated(err)
+		return
+	}
+	result = make([]string, 0, len(names) - 1)
+	for _, name := range names {
+		if name != "config.rc" && strings.HasSuffix(name, ".rc") {
+			result = append(result, name)
+		}
 	}
 	return
 }
