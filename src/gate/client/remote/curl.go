@@ -107,11 +107,7 @@ func (self *curl) doCurl(option, file, request string) (err error) {
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
-		return
-	}
-
-	err = exec.Command(prepare, run, "curl", args...)
+	err = exec.Command(prepare, nil, "curl", args...)
 
 	return
 }
