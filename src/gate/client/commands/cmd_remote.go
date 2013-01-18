@@ -94,11 +94,6 @@ func (self *cmd_remote) Help(line []string) (result string, err error) {
 	if cmd != nil {
 		return cmd.Help(line)
 	} else {
-		remotes, err = self.Command("list").(*cmd_remote_list).listRemotes()
-		if err != nil {
-			return
-		}
-
 		var (
 			commands_help []string
 			remotes_help string
@@ -118,6 +113,11 @@ func (self *cmd_remote) Help(line []string) (result string, err error) {
 				return
 			}
 			commands_help = append(commands_help, h)
+		}
+
+		remotes, err = self.Command("list").(*cmd_remote_list).listRemotes()
+		if err != nil {
+			return
 		}
 
 		switch len(remotes) {
