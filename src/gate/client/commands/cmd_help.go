@@ -51,8 +51,7 @@ func (self *cmd_help) Run(line []string) (err error) {
 			}
 			help = append(help, hlp)
 			extra = `
-Any other input is understood as a password request using the given key.
-If that key exists the password is stored in the clipboard.
+Any other input is understood as a [33mget[0m command of the entry as key.
 `
 		}
 	} else {
@@ -91,7 +90,7 @@ func (self *cmd_help) Complete(line []string) (result []string, err error) {
 func (self *cmd_help) Help(line []string) (result string, err error) {
 
 	result = `
-[33mhelp[0m		      Show this screen
+[33mhelp[0m		   Show this screen
 `
 
 	return

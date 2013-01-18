@@ -15,6 +15,10 @@
 
 package commands
 
+import (
+	"fmt"
+)
+
 type cmd_load cmd
 
 var _ Command = &cmd_load{}
@@ -32,13 +36,21 @@ func (self *cmd_load) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_load) Help(line []string) (result string, err error) {
+	var remote_note string
+	if len(line) == 1 {
+		remote_note = "the [1mremote note[0m below"
+	} else {
+		remote_note = "note perusing [1mhelp remote[0m"
+	}
 
-	result = `
+	result = fmt.Sprintf(`
 [33mload [remote][0m      [1mReplace[0m the local vault with the server's version.
 		   Note: in that case you will be asked for the new vault
 		   password (the previous vault is closed).
-		   [33m[remote][0m: see note below
-`
+		   [33m[remote][0m: see %s
+`,
+		remote_note,
+	)
 
 	return
 }

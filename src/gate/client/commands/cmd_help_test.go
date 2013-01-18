@@ -53,8 +53,7 @@ help for foo
 
 help for bar
 
-Any other input is understood as a password request using the given key.
-If that key exists the password is stored in the clipboard.
+Any other input is understood as a [33mget[0m command of the entry as key.
 
 [1m--------[0m
 [32mGate Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>[0m
