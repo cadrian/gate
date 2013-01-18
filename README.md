@@ -1,6 +1,6 @@
 # General description
 
-`gate` is a port of the infamous `pwdmgr` of mine (written in Eiffel),
+*Gate* is a port of the infamous *pwdmgr* of mine (written in Eiffel),
 but this time written in Go.
 
 The aim is to provide a very simple interface to a passwords database.
