@@ -27,14 +27,22 @@ func (self *cmd_remote_list) Name() string {
 	return "list"
 }
 
-func (self *cmd_remote_list) Run(line []string) (err error) {
+func (self *cmd_remote_list) listRemotes() (result []string, err error) {
 	files, err := self.config.ListConfigFiles()
 	if err != nil {
 		return
 	}
-	remotes := make([]string, 0, len(files))
+	result = make([]string, 0, len(files))
 	for _, file := range files {
-		remotes = append(remotes, file[0:len(file)-3])
+		result = append(result, file[0:len(file)-3])
+	}
+	return
+}
+
+func (self *cmd_remote_list) Run(line []string) (err error) {
+	remotes, err := self.listRemotes()
+	if err != nil {
+		return
 	}
 	self.mmi.Pager(strings.Join(remotes, "\n"))
 	return
@@ -45,5 +53,9 @@ func (self *cmd_remote_list) Complete(line []string) (result []string, err error
 }
 
 func (self *cmd_remote_list) Help(line []string) (result string, err error) {
+	result = `
+[33mremote list[0m
+		   Lists the known remotes.
+`
 	return
 }
