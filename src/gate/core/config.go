@@ -23,6 +23,7 @@ import (
 )
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -35,10 +36,13 @@ type Config interface {
 	// Get the list of extra configuration files, directly useable as first argument of Eval()
 	// "config.rc" itself is ommitted
 	ListConfigFiles() ([]string, error)
+
+	VaultPath() (string, error)
 }
 
 type config struct {
 	files map[string]*rc.File
+	vault string
 }
 
 // Get the user configuration
@@ -291,6 +295,30 @@ func (self *config) Eval(file string, section string, key string, evaluator func
 	}
 	if evaluator != nil {
 		result = eval(result, evaluator)
+	}
+	return
+}
+
+func (self *config) getVaultPath() (result string, err error) {
+	xdg, err := Xdg()
+	if err != nil {
+		return
+	}
+	data_home, err := xdg.DataHome()
+	if err != nil {
+		return
+	}
+	result = fmt.Sprintf("%s/vault", data_home)
+	return
+}
+
+func (self *config) VaultPath() (result string, err error) {
+	result = self.vault
+	if result == "" {
+		result, err = self.getVaultPath()
+		if err == nil {
+			self.vault = result
+		}
 	}
 	return
 }

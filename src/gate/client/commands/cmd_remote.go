@@ -18,6 +18,7 @@ package commands
 import (
 	"gate/core"
 	"gate/core/errors"
+	"gate/client/remote"
 	"gate/client/ui"
 	"gate/server"
 )
@@ -34,9 +35,10 @@ type cmd_remote struct {
 
 var _ CompositeCommand = &cmd_remote{}
 
-func newRemote(host_commander Commander, srv server.Server, config core.Config, mmi ui.UserInteraction) *cmd_remote {
+func newRemote(host_commander Commander, remoter remote.Remoter, srv server.Server, config core.Config, mmi ui.UserInteraction) *cmd_remote {
 	command := &cmd {
 		host_commander,
+		remoter,
 		srv,
 		config,
 		mmi,
@@ -47,7 +49,7 @@ func newRemote(host_commander Commander, srv server.Server, config core.Config, 
 		"list",
 	}
 
-	cmder.commands["list"] = &cmd_remote_list{cmder, srv, config, mmi}
+	cmder.commands["list"] = &cmd_remote_list{cmder, remoter, srv, config, mmi}
 
 	return &cmd_remote{command, cmder}
 }

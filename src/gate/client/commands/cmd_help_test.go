@@ -16,6 +16,7 @@
 package commands
 
 import (
+	"gate/client/remote"
 	"gate/client/ui"
 	"gate/core"
 	"gate/server"
@@ -31,10 +32,11 @@ func TestHelpRun1(t *testing.T) {
 	defer ctrl.Finish()
 
 	cmd := NewMockCommander(ctrl)
+	rem := remote.NewMockRemoter(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	help := &cmd_help{cmd, srv, cfg, mmi}
+	help := &cmd_help{cmd, rem, srv, cfg, mmi}
 
 	cmd_foo := NewMockCommand(ctrl)
 	cmd_bar := NewMockCommand(ctrl)
@@ -74,10 +76,11 @@ func TestHelpRun2(t *testing.T) {
 	defer ctrl.Finish()
 
 	cmd := NewMockCommander(ctrl)
+	rem := remote.NewMockRemoter(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	help := &cmd_help{cmd, srv, cfg, mmi}
+	help := &cmd_help{cmd, rem, srv, cfg, mmi}
 
 	cmd_foo := NewMockCommand(ctrl)
 

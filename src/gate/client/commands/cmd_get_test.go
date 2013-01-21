@@ -16,6 +16,7 @@
 package commands
 
 import (
+	"gate/client/remote"
 	"gate/client/ui"
 	"gate/core"
 	"gate/server"
@@ -31,10 +32,11 @@ func TestGetRun1(t *testing.T) {
 	defer ctrl.Finish()
 
 	cmd := NewMockCommander(ctrl)
+	rem := remote.NewMockRemoter(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	get := &cmd_get{cmd, srv, cfg, mmi}
+	get := &cmd_get{cmd, rem, srv, cfg, mmi}
 
 	mmi.EXPECT().XclipPassword("foo")
 
@@ -49,10 +51,11 @@ func TestGetRun2(t *testing.T) {
 	defer ctrl.Finish()
 
 	cmd := NewMockCommander(ctrl)
+	rem := remote.NewMockRemoter(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	get := &cmd_get{cmd, srv, cfg, mmi}
+	get := &cmd_get{cmd, rem, srv, cfg, mmi}
 
 	mmi.EXPECT().XclipPassword("foo")
 

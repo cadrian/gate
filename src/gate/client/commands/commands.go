@@ -16,6 +16,7 @@
 package commands
 
 import (
+	"gate/client/remote"
 	"gate/client/ui"
 	"gate/core"
 	"gate/core/errors"
@@ -54,30 +55,31 @@ type Command interface {
 
 type cmd struct {
 	commander Commander
+	remoter remote.Remoter
 	server server.Server
 	config core.Config
 	mmi ui.UserInteraction
 }
 
-func NewCommander(srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
+func NewCommander(remoter remote.Remoter, srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
 	cmd := &commander{
 		commands: make(map[string]Command),
 		defcmd: "get",
 	}
 	result = cmd
 
-	cmd.commands["add"] = &cmd_add{result, srv, config, mmi}
-	cmd.commands["del"] = &cmd_del{result, srv, config, mmi}
-	cmd.commands["help"] = &cmd_help{result, srv, config, mmi}
-	cmd.commands["list"] = &cmd_list{result, srv, config, mmi}
-	cmd.commands["load"] = &cmd_load{result, srv, config, mmi}
-	cmd.commands["master"] = &cmd_master{result, srv, config, mmi}
-	cmd.commands["merge"] = &cmd_merge{result, srv, config, mmi}
-	cmd.commands["remote"] = newRemote(result, srv, config, mmi)
-	cmd.commands["save"] = &cmd_save{result, srv, config, mmi}
-	cmd.commands["show"] = &cmd_show{result, srv, config, mmi}
-	cmd.commands["stop"] = &cmd_stop{result, srv, config, mmi}
-	cmd.commands["get"] = &cmd_get{result, srv, config, mmi}
+	cmd.commands["add"] = &cmd_add{result, remoter, srv, config, mmi}
+	cmd.commands["del"] = &cmd_del{result, remoter, srv, config, mmi}
+	cmd.commands["help"] = &cmd_help{result, remoter, srv, config, mmi}
+	cmd.commands["list"] = &cmd_list{result, remoter, srv, config, mmi}
+	cmd.commands["load"] = &cmd_load{result, remoter, srv, config, mmi}
+	cmd.commands["master"] = &cmd_master{result, remoter, srv, config, mmi}
+	cmd.commands["merge"] = &cmd_merge{result, remoter, srv, config, mmi}
+	cmd.commands["remote"] = newRemote(result, remoter, srv, config, mmi)
+	cmd.commands["save"] = &cmd_save{result, remoter, srv, config, mmi}
+	cmd.commands["show"] = &cmd_show{result, remoter, srv, config, mmi}
+	cmd.commands["stop"] = &cmd_stop{result, remoter, srv, config, mmi}
+	cmd.commands["get"] = &cmd_get{result, remoter, srv, config, mmi}
 
 	return
 }

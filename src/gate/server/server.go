@@ -107,15 +107,11 @@ func newVault(file string) Vault {
 func Start(config core.Config) (result ServerLocal, err error) {
 	log.Printf("Starting...")
 
-	xdg, err := core.Xdg()
+	vault_path, err := config.VaultPath()
 	if err != nil {
 		return
 	}
-	data_home, err := xdg.DataHome()
-	if err != nil {
-		return
-	}
-	vault_path := fmt.Sprintf("%s/vault", data_home)
+
 	srv := &server{
 		vault: newVault(vault_path),
 		config: config,

@@ -24,6 +24,25 @@ func (self *cmd_save) Name() string {
 }
 
 func (self *cmd_save) Run(line []string) (err error) {
+	var remoteName string
+	if len(line) > 1 {
+		remoteName = line[1]
+	} else {
+		remoteName = ""
+	}
+
+	remote, err := self.remoter.Remote(remoteName)
+	if err != nil {
+		return
+	}
+
+	vault_path, err := self.config.VaultPath()
+	if err != nil {
+		return
+	}
+
+	err = remote.SaveVault(vault_path)
+
 	return
 }
 

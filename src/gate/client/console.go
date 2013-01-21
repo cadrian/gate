@@ -17,6 +17,7 @@ package client
 
 import (
 	"gate/client/commands"
+	"gate/client/remote"
 	"gate/client/ui"
 	"gate/core"
 	"gate/core/errors"
@@ -114,12 +115,17 @@ Just hit [33m<enter>[0m to exit.
 		return
 	}
 
+	remoter := remote.NewRemoter(srv, config)
+	if err != nil {
+		return
+	}
+
 	mmi, err := ui.Ui(srv, config)
 	if err != nil {
 		return
 	}
 
-	commander, err := commands.NewCommander(srv, config, mmi)
+	commander, err := commands.NewCommander(remoter, srv, config, mmi)
 	if err != nil {
 		return
 	}

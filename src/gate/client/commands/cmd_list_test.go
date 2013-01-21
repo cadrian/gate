@@ -16,6 +16,7 @@
 package commands
 
 import (
+	"gate/client/remote"
 	"gate/client/ui"
 	"gate/core"
 	"gate/server"
@@ -31,10 +32,11 @@ func TestListRun1(t *testing.T) {
 	defer ctrl.Finish()
 
 	cmd := NewMockCommander(ctrl)
+	rem := remote.NewMockRemoter(ctrl)
 	srv := server.NewMockServer(ctrl)
 	cfg := core.NewMockConfig(ctrl)
 	mmi := ui.NewMockUserInteraction(ctrl)
-	list := &cmd_list{cmd, srv, cfg, mmi}
+	list := &cmd_list{cmd, rem, srv, cfg, mmi}
 
 	srv.EXPECT().List(".*", gomock.Any()).Do(func (filter string, reply *[]string) {
 		*reply = []string{"key1", "key2"}

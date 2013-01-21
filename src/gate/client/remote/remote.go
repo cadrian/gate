@@ -76,6 +76,13 @@ func NewRemoter(srv server.Server, config core.Config) Remoter {
 }
 
 func (self *remoter) Remote(name string) (result Remote, err error) {
+	if name == "" && len(self.remotes) == 1 {
+		for _, rem := range self.remotes {
+			result = rem
+			return
+		}
+	}
+
 	result, ok := self.remotes[name]
 	if !ok {
 		result, err = self.readRemote(name)
