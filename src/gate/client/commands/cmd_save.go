@@ -15,6 +15,10 @@
 
 package commands
 
+import (
+	"fmt"
+)
+
 type cmd_save cmd
 
 var _ Command = &cmd_save{}
@@ -51,5 +55,19 @@ func (self *cmd_save) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_save) Help(line []string) (result string, err error) {
+	var remote_note string
+	if len(line) == 1 {
+		remote_note = "the [1mremote note[0m above"
+	} else {
+		remote_note = "note perusing [1mhelp remote[0m"
+	}
+
+	result = fmt.Sprintf(`
+[33msave [remote][0m      Save the password vault upto the server.
+		   [33m[remote][0m: see %s
+`,
+		remote_note,
+	)
+
 	return
 }

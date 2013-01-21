@@ -42,5 +42,12 @@ func (self *cmd_get) Complete(line []string) (result []string, err error) {
 }
 
 func (self *cmd_get) Help(line []string) (result string, err error) {
+
+	result = `
+[33mget <key>[0m	   Get a password using the given key.
+		   If that key exists the password is stored in the clipboard.
+
+`
+
 	return
 }

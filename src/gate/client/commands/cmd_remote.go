@@ -96,11 +96,6 @@ func (self *cmd_remote) Help(line []string) (result string, err error) {
 	if cmd != nil {
 		return cmd.Help(line)
 	} else {
-		remotes, err = self.Command("list").(*cmd_remote_list).listRemotes()
-		if err != nil {
-			return
-		}
-
 		var (
 			commands_help []string
 			remotes_help string
@@ -122,29 +117,32 @@ func (self *cmd_remote) Help(line []string) (result string, err error) {
 			commands_help = append(commands_help, h)
 		}
 
+		remotes, err = self.Command("list").(*cmd_remote_list).listRemotes()
+		if err != nil {
+			return
+		}
+
 		switch len(remotes) {
 		case 0:
 			remotes_help = "There are no remotes defined."
 		case 1:
 			remotes_help = fmt.Sprintf("There is only one remote defined: [1m%s[0m", remotes[0])
 		default:
-			remotes_help = fmt.Sprintf("The defined remotes are:\n [1;33m|[0m [1m%s[0m", strings.Join(remotes, ", "))
+			remotes_help = fmt.Sprintf("The defined remotes are:\n		   [1;33m|[0m [1m%s[0m", strings.Join(remotes, ", "))
 		}
 
-		result = fmt.Sprintf(`
-%s
-
- [1;33m|[0m [33m[remote][0m note:
- [1;33m|[0m The [33mload[0m, [33msave[0m, [33mmerge[0m, and [33mremote[0m commands require
- [1;33m|[0m an extra argument if there is more than one available
- [1;33m|[0m remotes.
- [1;33m|[0m In that case, the argument is the remote to select.
- [1;33m|[0m
- [1;33m|[0m %s
+		result = fmt.Sprintf(`%s
+		   [1;33m|[0m [33m[remote][0m note:
+		   [1;33m|[0m The [33mload[0m, [33msave[0m, [33mmerge[0m, and [33mremote[0m commands require
+		   [1;33m|[0m an extra argument if there is more than one available
+		   [1;33m|[0m remotes.
+		   [1;33m|[0m In that case, the argument is the remote to select.
+		   [1;33m|[0m
+		   [1;33m|[0m %s
 `,
 			strings.Join(commands_help, "\n"),
 			remotes_help,
-			)
+		)
 	}
 
 	return

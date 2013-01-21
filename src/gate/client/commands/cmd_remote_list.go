@@ -54,8 +54,7 @@ func (self *cmd_remote_list) Complete(line []string) (result []string, err error
 
 func (self *cmd_remote_list) Help(line []string) (result string, err error) {
 	result = `
-[33mremote list[0m
-		   Lists the known remotes.
+[33mremote list[0m	   Lists the known remotes.
 `
 	return
 }

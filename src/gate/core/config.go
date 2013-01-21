@@ -43,12 +43,19 @@ type Config interface {
 type config struct {
 	files map[string]*rc.File
 	vault string
+	main_rc string
 }
 
 // Get the user configuration
 func NewConfig() (result Config, err error) {
+	main_rc := "config.rc"
+	if len(os.Args) > 1 {
+		main_rc = os.Args[1]
+	}
+
 	result = &config{
 		files: make(map[string]*rc.File),
+		main_rc: main_rc,
 	}
 	return
 }
@@ -287,7 +294,7 @@ func eval(raw string, evaluator func(string) string) (result string) {
 
 func (self *config) Eval(file string, section string, key string, evaluator func(string) string) (result string, err error) {
 	if file == "" {
-		file = "config.rc"
+		file = self.main_rc
 	}
 	result, err = self.rawValue(file, section, key)
 	if err != nil {

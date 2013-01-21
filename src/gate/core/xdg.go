@@ -118,14 +118,22 @@ func checkdir(dirname string) (result string, err error) {
 }
 
 func read(file string, dirs []string) (result io.ReadCloser, err error) {
-	for _, dir := range dirs {
-		path := fmt.Sprintf("%s/gate/%s", dir, file)
-		result, err = os.Open(path)
+	if strings.ContainsRune(file, '/') {
+		result, err = os.Open(file)
 		if err == nil {
 			return
 		}
+		err = errors.Newf("Could not find file %s", file)
+	} else {
+		for _, dir := range dirs {
+			path := fmt.Sprintf("%s/gate/%s", dir, file)
+			result, err = os.Open(path)
+			if err == nil {
+				return
+			}
+		}
+		err = errors.Newf("Could not find file %s (looked in %s/gate)", file, strings.Join(dirs, "/gate, "))
 	}
-	err = errors.Newf("Could not find file %s (looked in %s/gate)", file, strings.Join(dirs, "/gate, "))
 	return
 }
 
