@@ -1,0 +1,6 @@
+gate
+*.1
+files
+*.log
+*.debhelper
+*.substvars

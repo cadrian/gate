@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+ECHO=${1:-echo}
 
 export GOPATH=$(dirname $(readlink -f $0))
 export PATH=$GOPATH/bin:"$PATH"
@@ -6,14 +8,14 @@ export TMPDIR=${TMPDIR:-$GOPATH/.tmp} # because /tmp may have noexec option
 
 mkdir -p $TMPDIR
 
-echo Fetching deps
+$ECHO Fetching deps
 go get github.com/sbinet/liner
 go get code.google.com/p/gomock/gomock
 go get code.google.com/p/gomock/mockgen
 go get code.google.com/p/go.crypto/scrypt
 
-echo
-echo Generating mocks
+$ECHO
+$ECHO Generating mocks
 find src -name mocks.go -exec rm {} +
 TESTS=$(find src/gate -name \*_test.go -exec dirname {} \; | uniq | cut -c5-)
 
@@ -27,17 +29,17 @@ gate/client/ui UserInteraction
 gate/core Config
 EOF
 
-echo Launching tests
+$ECHO Launching tests
 go test -i $TESTS
 go test $TESTS || exit 1
 
-echo
+$ECHO
 find src -name main.go -print | while read main_go; do
     main=$(dirname $main_go)
     exe=${main#src/}
-    echo Building $(basename $exe)
+    $ECHO Building $(basename $exe)
     go install $exe
 done
 
-echo
-echo Done
+$ECHO
+$ECHO Done

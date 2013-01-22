@@ -1,0 +1,17 @@
+Source: gate
+Section: utils
+Priority: extra
+Maintainer: Cyril Adrian <cyril.adrian@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), golang | golang-stable | golang-weekly | golang-tip, docbook-to-man
+Standards-Version: 3.9.3
+Homepage: https://github.com/cadrian/gate
+Vcs-Git: git://github.com/cadrian/gate.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/gate.git;a=summary
+
+Package: gate
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, openssl, xclip, yad
+Recommends: curl, scp, xterm
+Description: simple and intuitive password manager
+ A password manager for lazy people who want good security
+ (such as different passwords for each web site)

@@ -1,0 +1,4 @@
+?package(gate):needs="X11" section="Applications/System/Security"\
+  title="gate" command="/usr/bin/gate_menu"
+?package(gate):needs="X11" section="Applications/System/Security"\
+  title="gate" command="/usr/bin/gate_console"
