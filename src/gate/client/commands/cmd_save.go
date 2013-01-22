@@ -16,6 +16,10 @@
 package commands
 
 import (
+	"gate/core/errors"
+)
+
+import (
 	"fmt"
 )
 
@@ -42,6 +46,16 @@ func (self *cmd_save) Run(line []string) (err error) {
 
 	vault_path, err := self.config.VaultPath()
 	if err != nil {
+		return
+	}
+
+	var saved bool
+	err = self.server.Save(true, &saved)
+	if err != nil {
+		return
+	}
+	if !saved {
+		err = errors.Newf("Could not save vault")
 		return
 	}
 

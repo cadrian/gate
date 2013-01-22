@@ -289,7 +289,7 @@ func (self *vault) save(config core.Config) (err error) {
 }
 
 func (self *vault) Save(force bool, config core.Config) (err error) {
-	if force || self.dirty {
+	if self.dirty || force {
 		err = self.save(config)
 		if err != nil {
 			return
