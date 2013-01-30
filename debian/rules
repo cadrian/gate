@@ -14,5 +14,6 @@
 
 override_dh_auto_build:
 	docbook-to-man debian/gate_console.sgml > debian/gate_console.1
+	docbook-to-man debian/gate_cli.sgml > debian/gate_cli.1
 	docbook-to-man debian/gate_menu.sgml > debian/gate_menu.1
 	dh_auto_build

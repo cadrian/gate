@@ -1,5 +1,8 @@
+BUILD=gccgo
+ECHO=:
+
 all:
-	sh build.sh ':'
+	BUILD=$(BUILD) sh build.sh $(ECHO)
 
 clean:
 	rm -rf bin pkg

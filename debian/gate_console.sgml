@@ -76,7 +76,7 @@ manpage.1: manpage.sgml
   <refsect1>
     <title>SEE ALSO</title>
 
-    <para>gate_menu (1).</para>
+    <para>gate_cli (1), gate_menu (1).</para>
 
   </refsect1>
   <refsect1>

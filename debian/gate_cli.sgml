@@ -26,8 +26,8 @@ manpage.1: manpage.sgml
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
   <!ENTITY dhemail     "<email>cyril.adrian@gmail.com</email>">
   <!ENTITY dhusername  "Cyril Adrian">
-  <!ENTITY dhucpackage "<refentrytitle>GATE_MENU</refentrytitle>">
-  <!ENTITY dhpackage   "gate_menu">
+  <!ENTITY dhucpackage "<refentrytitle>GATE_CLI</refentrytitle>">
+  <!ENTITY dhpackage   "gate_cli">
 
   <!ENTITY debian      "<productname>Debian</productname>">
   <!ENTITY gnu         "<acronym>GNU</acronym>">
@@ -57,7 +57,7 @@ manpage.1: manpage.sgml
   <refnamediv>
     <refname>&dhpackage;</refname>
 
-    <refpurpose>A menu of known password keys</refpurpose>
+    <refpurpose>A command line for known password keys</refpurpose>
   </refnamediv>
   <refsynopsisdiv>
     <cmdsynopsis>
@@ -67,15 +67,16 @@ manpage.1: manpage.sgml
   <refsect1>
     <title>DESCRIPTION</title>
 
-    <para><command>&dhpackage;</command> allows one to simply select a
-      key from a list. The corresponding password is copied in the X
-      clipboard.</para>
+    <para><command>&dhpackage;</command> allows one to manage the
+      known keys and associated passwords. It accepts a console
+      command as its argument.  For example, help is included by
+      simply typing <command>&dhpackage; help</command>.</para>
 
   </refsect1>
   <refsect1>
     <title>SEE ALSO</title>
 
-    <para>gate_console (1), gate_cli (1).</para>
+    <para>gate_menu (1), gate_console (1).</para>
 
   </refsect1>
   <refsect1>

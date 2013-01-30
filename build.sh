@@ -1,6 +1,7 @@
 #!/bin/sh
 
 ECHO=${1:-echo}
+BUILD=${BUILD:-go}
 
 export GOPATH=$(dirname $(readlink -f $0))
 export PATH=$GOPATH/bin:"$PATH"
@@ -34,11 +35,24 @@ go test -i $TESTS
 go test $TESTS || exit 1
 
 $ECHO
+case $BUILD in
+    go)
+        compile="go install"
+        ;;
+    gccgo)
+        compile="go install -compiler gccgo -gccgoflags '$CPPFLAGS $CFLAGS $LDFLAGS -static-libgcc'"
+        ;;
+    *)
+        echo "Unknown BUILD=$BUILD -- don't build $(basename exe)"
+        ;;
+esac
+
+$ECHO Building Gate executables using "'$BUILD'"
 find src -name main.go -print | while read main_go; do
     main=$(dirname $main_go)
     exe=${main#src/}
     $ECHO Building $(basename $exe)
-    go install $exe
+    eval "$compile $exe"
 done
 
 $ECHO
