@@ -3,4 +3,5 @@
 dist=$(dirname $(dirname $(readlink -f $0))); exe=$dist/exe; prop=$dist/conf/config.rc
 PATH=$exe:$PATH; export PATH
 umask 077
-exec cli $prop
+rc=$prop
+exec cli "$rc" "$@"

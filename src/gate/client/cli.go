@@ -49,12 +49,12 @@ func CommandLine(config core.Config) (err error) {
 		return
 	}
 
-	cmd := commander.Command(os.Args[1])
+	cmd := commander.Command(os.Args[2])
 	if cmd == nil {
 		cmd = commander.Default()
 	}
 
-	err = cmd.Run(os.Args[1:])
+	err = cmd.Run(os.Args[2:])
 
 	return
 }

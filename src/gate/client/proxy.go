@@ -68,7 +68,11 @@ func startServer() (err error) {
 		} else {
 			exe = fmt.Sprintf("%s/server", dir)
 		}
-		p.Write([]byte(fmt.Sprintf("%s > /tmp/server.log 2>&1\n", exe)))
+		var rc string
+		if len(os.Args) > 1 {
+			rc = os.Args[1]
+		}
+		p.Write([]byte(fmt.Sprintf("%s \"%s\" > /tmp/server.log 2>&1\n", exe, rc)))
 
 		err = p.Close()
 		if err != nil {

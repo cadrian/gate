@@ -50,7 +50,13 @@ type config struct {
 func NewConfig() (result Config, err error) {
 	main_rc := "config.rc"
 	if len(os.Args) > 1 {
-		main_rc = os.Args[1]
+		rc := os.Args[1]
+		if strings.HasSuffix(rc, ".rc") {
+			_, err = os.Stat(rc)
+			if err == nil {
+				main_rc = rc
+			}
+		}
 	}
 
 	result = &config{
