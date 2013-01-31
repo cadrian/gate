@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	osexec "os/exec"
 	"strconv"
 	"strings"
 )
@@ -37,9 +38,7 @@ var _proxy server.Server
 
 func dirname() (result string) {
 	path := strings.Split(os.Args[0], "/")
-	if len(path) == 1 {
-		result = "."
-	} else {
+	if len(path) > 1 {
 		result = strings.Join(path[:len(path)-1], "/")
 	}
 	return
@@ -59,7 +58,17 @@ func startServer() (err error) {
 
 	run := func (cmd *exec.Cmd) (err error) {
 		p := <-pipe
-		p.Write([]byte(fmt.Sprintf("%s/server > /tmp/server.log 2>&1\n", dirname())))
+		dir := dirname()
+		var exe string
+		if dir == "" {
+			exe, err = osexec.LookPath("server")
+			if err != nil {
+				return errors.Decorated(err)
+			}
+		} else {
+			exe = fmt.Sprintf("%s/server", dir)
+		}
+		p.Write([]byte(fmt.Sprintf("%s > /tmp/server.log 2>&1\n", exe)))
 
 		err = p.Close()
 		if err != nil {
