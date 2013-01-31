@@ -1,4 +1,4 @@
-BUILD=gccgo
+BUILD=go #gccgo
 ECHO=:
 
 all:
