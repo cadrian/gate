@@ -45,7 +45,7 @@ type Out func() (io.WriteCloser, error)
 type Vault interface {
 	Open(master string, config core.Config) error
 	IsOpen() bool
-	Close() error
+	Close(config core.Config) error
 	Item(name string) (Key, error)
 	List(filter string) ([]string, error)
 	Merge(other Vault) error
@@ -183,7 +183,13 @@ func (self *vault) IsOpen() bool {
 	return self.open
 }
 
-func (self *vault) Close() (err error) {
+func (self *vault) Close(config core.Config) (err error) {
+
+	err = self.Save(false, config)
+	if err != nil {
+		return
+	}
+
 	self.data = make(map[string]*key)
 	self.open = false
 	self.master = ""

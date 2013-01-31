@@ -155,7 +155,7 @@ func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
 	if self.vault.IsOpen() {
 		*reply = true
 		if thenClose {
-			err = self.vault.Close()
+			err = self.vault.Close(self.config)
 		}
 	} else {
 		*reply = false
@@ -215,7 +215,7 @@ func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
 	if err != nil {
 		return
 	}
-	err = vault.Close()
+	err = vault.Close(self.config)
 	if err != nil {
 		return
 	}
@@ -266,11 +266,7 @@ func (self *server) Unset(key string, reply *bool) (err error) {
 func (self *server) Stop(status int, reply *bool) (err error) {
 	log.Printf("Stop(status=%d)", status)
 	if self.vault.IsOpen() {
-		err = self.vault.Save(false, self.config)
-		if err != nil {
-			return
-		}
-		err = self.vault.Close()
+		err = self.vault.Close(self.config)
 		if err != nil {
 			return
 		}
