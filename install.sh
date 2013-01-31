@@ -4,7 +4,7 @@ export ROOTDIR=$(dirname $(readlink -f $0))
 
 mkdir -p $DESTDIR/usr/bin
 mkdir -p $DESTDIR/usr/lib/gate
-mkdir -p $DESTDIR/etc/gate
+mkdir -p $DESTDIR/etc/xdg/gate
 
 for bin in console cli menu server; do
     cp $ROOTDIR/bin/$bin $DESTDIR/usr/lib/gate/
@@ -17,5 +17,5 @@ for script in gate_cli gate_console gate_menu; do
 done
 
 for rc in $ROOTDIR/conf/*.rc; do
-    cp $rc $DESTDIR/etc/gate/
+    cp $rc $DESTDIR/etc/xdg/gate/
 done
