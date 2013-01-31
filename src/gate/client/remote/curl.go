@@ -55,7 +55,7 @@ func newCurl(name string, srv server.Server, config core.Config, remoter Remoter
 	}
 	file := name + ".rc"
 	for key, mandatory := range CurlAllowedKeys {
-		value, err := config.Eval(file, "remote", key, nil)
+		value, err := config.Eval(file, "remote", key, os.Getenv)
 		if err != nil && mandatory {
 			return nil, err
 		}
