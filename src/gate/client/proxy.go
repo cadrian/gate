@@ -74,13 +74,7 @@ func startServer() (err error) {
 			rc = os.Args[1]
 		}
 
-		writeln := func(pattern string, arg ...interface{}) {
-			line := fmt.Sprintf(pattern, arg...) + "\n"
-			//fmt.Printf("|%s", line)
-			p.Write([]byte(line))
-		}
-
-		writeln("%s \"%s\" > /tmp/server-%s.log 2>&1", exe, rc, time.Now().Format("20060102150405"))
+		p.Write([]byte(fmt.Sprintf("%s \"%s\" > /tmp/server-%s.log 2>&1\n", exe, rc, time.Now().Format("20060102150405"))))
 
 		err = p.Close()
 		if err != nil {
