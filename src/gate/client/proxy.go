@@ -73,17 +73,14 @@ func startServer() (err error) {
 		if len(os.Args) > 1 {
 			rc = os.Args[1]
 		}
-		p.Write([]byte(fmt.Sprintf(`
-USER='%s'; export USER
-HOME='%s'; export HOME
-%s \"%s\" > /tmp/server-%s.log 2>&1
-`,
-			os.Getenv("USER"),
-			os.Getenv("HOME"),
-			exe,
-			rc,
-			time.Now().Format("20060102150405"),
-		)))
+
+		writeln := func(pattern string, arg ...interface{}) {
+			line := fmt.Sprintf(pattern, arg...) + "\n"
+			//fmt.Printf("|%s", line)
+			p.Write([]byte(line))
+		}
+
+		writeln("%s \"%s\" > /tmp/server-%s.log 2>&1", exe, rc, time.Now().Format("20060102150405"))
 
 		err = p.Close()
 		if err != nil {
