@@ -15,6 +15,10 @@
 
 package commands
 
+import (
+	"fmt"
+)
+
 type cmd_master cmd
 
 var _ Command = &cmd_master{}
@@ -24,6 +28,7 @@ func (self *cmd_master) Name() string {
 }
 
 func (self *cmd_master) Run(line []string) (err error) {
+	fmt.Println("not yet implemented")
 	return
 }
 

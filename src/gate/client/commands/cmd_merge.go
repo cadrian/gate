@@ -15,6 +15,10 @@
 
 package commands
 
+import (
+	"fmt"
+)
+
 type cmd_merge cmd
 
 var _ Command = &cmd_merge{}
@@ -24,6 +28,7 @@ func (self *cmd_merge) Name() string {
 }
 
 func (self *cmd_merge) Run(line []string) (err error) {
+	fmt.Println("not yet implemented")
 	return
 }
 
