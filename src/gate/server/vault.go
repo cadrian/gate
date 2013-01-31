@@ -30,6 +30,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -67,14 +68,20 @@ type vault struct {
 
 var _ Vault = &vault{}
 
+func finalize(v *vault) {
+	v.Close(nil)
+}
+
 // Create a new vault.
 func NewVault(in In, out Out) (result Vault) {
-	result = &vault{
+	v := &vault{
 		data: make(map[string]*key),
 		in: in,
 		out: out,
 		recipes: make(map[string]Generator, 32),
 	}
+	runtime.SetFinalizer(v, finalize)
+	result = v
 	return
 }
 
@@ -184,15 +191,19 @@ func (self *vault) IsOpen() bool {
 }
 
 func (self *vault) Close(config core.Config) (err error) {
-
-	err = self.Save(false, config)
-	if err != nil {
-		return
+	if config != nil {
+		err = self.Save(false, config)
+		if err != nil {
+			return
+		}
 	}
 
 	self.data = make(map[string]*key)
 	self.open = false
 	self.master = ""
+
+	runtime.GC()
+
 	return
 }
 

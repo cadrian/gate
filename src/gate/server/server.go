@@ -213,6 +213,7 @@ func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
 	}
 	err = self.vault.Merge(vault)
 	if err != nil {
+		vault.Close(self.config)
 		return
 	}
 	err = vault.Close(self.config)
