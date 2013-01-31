@@ -181,13 +181,13 @@ func proxy(config core.Config) (result server.Server, err error) {
 			err = errors.Decorated(err)
 			return
 		}
-		s, err = server.Proxy(host, int(port))
+		s, err = server.Proxy(host, int(port), false)
 		if err != nil {
 			err = startServer()
 			if err != nil {
 				return
 			}
-			s, err = server.Proxy(host, int(port))
+			s, err = server.Proxy(host, int(port), true)
 			if err != nil {
 				return
 			}
