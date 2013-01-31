@@ -34,7 +34,13 @@ type curl remote
 
 var _ Remote = &curl{}
 
-var CurlAllowedKeys []string = []string{"url", "user", "passkey", "put_request", "get_request"}
+var CurlAllowedKeys map[string]bool = map[string]bool{
+	"url": true,
+	"user": false,
+	"passkey": false,
+	"put_request": false,
+	"get_request": false,
+}
 
 func newCurl(name string, srv server.Server, config core.Config, remoter Remoter) (Remote, error) {
 	result := &curl {
@@ -48,9 +54,9 @@ func newCurl(name string, srv server.Server, config core.Config, remoter Remoter
 		nil,
 	}
 	file := name + ".rc"
-	for _, key := range CurlAllowedKeys {
+	for key, mandatory := range CurlAllowedKeys {
 		value, err := config.Eval(file, "remote", key, nil)
-		if err != nil {
+		if err != nil && mandatory {
 			return nil, err
 		}
 		if value != "" {

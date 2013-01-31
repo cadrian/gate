@@ -35,7 +35,12 @@ type scp remote
 
 var _ Remote = &scp{}
 
-var ScpAllowedKeys []string = []string{"file", "host", "user", "options"}
+var ScpAllowedKeys map[string]bool = map[string]bool{
+	"file": true,
+	"host": true,
+	"user": false,
+	"options": false,
+}
 
 func newScp(name string, srv server.Server, config core.Config, remoter Remoter) (Remote, error) {
 	result := &scp {
@@ -49,9 +54,9 @@ func newScp(name string, srv server.Server, config core.Config, remoter Remoter)
 		nil,
 	}
 	file := name + ".rc"
-	for _, key := range ScpAllowedKeys {
+	for key, mandatory := range ScpAllowedKeys {
 		value, err := config.Eval(file, "remote", key, nil)
-		if err != nil {
+		if err != nil && mandatory {
 			return nil, err
 		}
 		if value != "" {

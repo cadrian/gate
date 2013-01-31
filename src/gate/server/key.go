@@ -61,7 +61,7 @@ func (self *key) Delete() {
 }
 
 func (self *key) Encoded() string {
-	return fmt.Sprintf("%s:%d:%d:%s", self.name, self.addcount, self.delcount, self.pass)
+	return fmt.Sprintf("%s:%d:%d:%s\n", self.name, self.addcount, self.delcount, self.pass)
 }
 
 func (self *key) Merge(other Key) {

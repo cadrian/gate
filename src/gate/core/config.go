@@ -104,12 +104,12 @@ func (self *config) findFile(file string) (result *rc.File, err error) {
 	if err != nil {
 		return
 	}
-	in, err := xdg.ReadConfig(file)
+	in, name, err := xdg.ReadConfig(file)
 	if err != nil {
 		return
 	}
 
-	result, err = rc.Read(in)
+	result, err = rc.Read(in, name)
 	if err != nil {
 		in.Close()
 		return
@@ -134,17 +134,17 @@ func (self *config) rawValue(file string, section string, key string) (result st
 	if section == "" {
 		sec = f.Anonymous
 		if sec == nil {
-			return "", errors.Newf("No anonymous section in file %s", section, file)
+			return "", errors.Newf("No anonymous section in file %s", section, f.Name)
 		}
 	} else {
 		sec, ok = f.Sections[section]
 		if !ok {
-			return "", errors.Newf("Unknown section [%s] in file %s", section, file)
+			return "", errors.Newf("Unknown section [%s] in file %s", section, f.Name)
 		}
 	}
 	result, ok = sec.Resources[key]
 	if !ok {
-		return "", errors.Newf("Unknown key %s in section [%s] of file %s", key, section, file)
+		return "", errors.Newf("Unknown key %s in section [%s] of file %s", key, section, f.Name)
 	}
 	return
 }

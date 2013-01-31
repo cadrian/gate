@@ -27,14 +27,18 @@ import (
 )
 
 type properties struct {
-	allowed []string
+	allowed map[string]bool
 	properties map[string]string
 }
 
 func (self *properties) setProperty(key, value string) (err error) {
-	for _, k := range self.allowed {
+	for k, mandatory := range self.allowed {
 		if k == key {
-			self.properties[key] = value
+			if value == "" && mandatory {
+				err = errors.Newf("cannot reset '%s': mandatory property", key)
+			} else {
+				self.properties[key] = value
+			}
 			return
 		}
 	}
@@ -42,7 +46,11 @@ func (self *properties) setProperty(key, value string) (err error) {
 }
 
 func (self *properties) resetProperty(key string) (err error) {
-	delete(self.properties, key)
+	if self.allowed[key] {
+		err = errors.Newf("cannot reset '%s': mandatory property", key)
+	} else {
+		delete(self.properties, key)
+	}
 	return
 }
 

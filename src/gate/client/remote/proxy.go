@@ -34,7 +34,13 @@ type proxy struct {
 
 var _ Proxy = &proxy{}
 
-var ProxyAllowedKeys []string = []string{"host", "port", "protocol", "user", "pass"}
+var ProxyAllowedKeys map[string]bool = map[string]bool{
+	"host": true,
+	"port": false,
+	"protocol": false,
+	"user": false,
+	"pass": false,
+}
 
 func newProxy() Proxy {
 	return &proxy {

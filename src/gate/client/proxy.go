@@ -32,6 +32,7 @@ import (
 	osexec "os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var _proxy server.Server
@@ -72,7 +73,17 @@ func startServer() (err error) {
 		if len(os.Args) > 1 {
 			rc = os.Args[1]
 		}
-		p.Write([]byte(fmt.Sprintf("%s \"%s\" > /tmp/server.log 2>&1\n", exe, rc)))
+		p.Write([]byte(fmt.Sprintf(`
+USER='%s'; export USER
+HOME='%s'; export HOME
+%s \"%s\" > /tmp/server-%s.log 2>&1
+`,
+			os.Getenv("USER"),
+			os.Getenv("HOME"),
+			exe,
+			rc,
+			time.Now().Format("20060102150405"),
+		)))
 
 		err = p.Close()
 		if err != nil {

@@ -123,9 +123,20 @@ func (self *FileContent) SkipSymbol(symbol string) (result string, err error) {
 
 // Skip spaces.
 func (self *FileContent) SkipBlanks() (result string, err error) {
+	flag := false
+	in_comment := &flag
+
 	return self.SkipUntil(func(k rune, index int) bool {
 		switch k {
-		case ' ', '\t', '\n', '\r':
+		case ' ', '\t', '\r':
+			return false
+		case '\n':
+			*in_comment = false
+			return false
+		case '#':
+			*in_comment = true
+		}
+		if *in_comment {
 			return false
 		}
 		return true

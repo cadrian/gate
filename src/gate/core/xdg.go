@@ -30,10 +30,10 @@ import (
 
 // XDG context
 type XdgContext interface {
-	// Find a data file and returns the corresponding reader.
-	ReadData(file string) (io.ReadCloser, error)
-	// Find a config file and returns the corresponding reader.
-	ReadConfig(file string) (io.ReadCloser, error)
+	// Find a data file and returns the corresponding reader and full file name.
+	ReadData(file string) (io.ReadCloser, string, error)
+	// Find a config file and returns the corresponding reader and full file name.
+	ReadConfig(file string) (io.ReadCloser, string, error)
 	// The XDG cache home (usually $HOME/.cache).
 	CacheHome() (string, error)
 	// The XDG runtime directory (usually inside /tmp).
@@ -117,10 +117,11 @@ func checkdir(dirname string) (result string, err error) {
 	return
 }
 
-func read(file string, dirs []string) (result io.ReadCloser, err error) {
+func read(file string, dirs []string) (result io.ReadCloser, name string, err error) {
 	if strings.ContainsRune(file, '/') {
 		result, err = os.Open(file)
 		if err == nil {
+			name = file
 			return
 		}
 		err = errors.Newf("Could not find file %s", file)
@@ -129,6 +130,7 @@ func read(file string, dirs []string) (result io.ReadCloser, err error) {
 			path := fmt.Sprintf("%s/gate/%s", dir, file)
 			result, err = os.Open(path)
 			if err == nil {
+				name = path
 				return
 			}
 		}
@@ -137,11 +139,11 @@ func read(file string, dirs []string) (result io.ReadCloser, err error) {
 	return
 }
 
-func (self *xdgContext) ReadData(file string) (result io.ReadCloser, err error) {
+func (self *xdgContext) ReadData(file string) (io.ReadCloser, string, error) {
 	return read(file, self.data_dirs)
 }
 
-func (self *xdgContext) ReadConfig(file string) (result io.ReadCloser, err error) {
+func (self *xdgContext) ReadConfig(file string) (io.ReadCloser, string, error) {
 	return read(file, self.config_dirs)
 }
 

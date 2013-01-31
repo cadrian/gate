@@ -26,6 +26,7 @@ type Section struct {
 }
 
 type File struct {
+	Name string
 	Anonymous *Section
 	Sections map[string]*Section
 }
@@ -34,6 +35,10 @@ func (self *File) readSection(content *FileContent) (result *Section, err error)
 	//fmt.Printf("<readSection %s>\n", content.Debug())
 	result = &Section{Resources: make(map[string]string)}
 	var k rune
+	_, err = content.SkipBlanks()
+	if err != nil {
+		return
+	}
 	for done := !content.IsValid(); !done; {
 		k, err = content.Current()
 		if err != nil {
@@ -130,8 +135,11 @@ func (self *File) readNamedSection(content *FileContent) (err error) {
 }
 
 // Read all the data (until EOF) and returns the configuration object.
-func Read(in io.Reader) (result *File, err error) {
-	result = &File{Sections: make(map[string]*Section)}
+func Read(in io.Reader, name string) (result *File, err error) {
+	result = &File{
+		Name: name,
+		Sections: make(map[string]*Section),
+	}
 	content := ReadFile(in)
 	if content.IsValid() {
 		err = result.readAnonymousSection(content)

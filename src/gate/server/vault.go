@@ -326,11 +326,17 @@ func (self *vault) Unset(name string) (err error) {
 
 func (self *vault) SetPass(name string, pass string) (err error) {
 	k, ok := self.data[name]
-	if !ok {
-		k = &key{}
+	if ok {
+		k.SetPassword(pass)
+	} else {
+		k = &key{
+			name: name,
+			pass: pass,
+			delcount: 0,
+			addcount: 1,
+		}
 		self.data[name] = k
 	}
-	k.SetPassword(pass)
 	self.dirty = true
 	return
 }

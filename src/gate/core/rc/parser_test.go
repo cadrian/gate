@@ -22,9 +22,12 @@ import (
 
 func TestReadAnonymous(t *testing.T) {
 	in := strings.NewReader("test = foobar")
-	file, err := Read(in)
+	file, err := Read(in, "foo")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if file.Name != "foo" {
+		t.Fatalf("bad file name: '%s'\n", file.Name)
 	}
 	if len(file.Anonymous.Resources) != 1 {
 		t.Fatalf("bad anonymous length: %d\n", len(file.Anonymous.Resources))
@@ -35,10 +38,13 @@ func TestReadAnonymous(t *testing.T) {
 }
 
 func TestReadNamed(t *testing.T) {
-	in := strings.NewReader("[what]\ntest = foobar")
-	file, err := Read(in)
+	in := strings.NewReader("#comment\n[what] #more comment\ntest = foobar # not a comment")
+	file, err := Read(in, "foo")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if file.Name != "foo" {
+		t.Fatalf("bad file name: '%s'\n", file.Name)
 	}
 	if len(file.Anonymous.Resources) != 0 {
 		t.Fatalf("bad anonymous length: %d\n", len(file.Anonymous.Resources))
@@ -53,16 +59,19 @@ func TestReadNamed(t *testing.T) {
 	if len(section.Resources) != 1 {
 		t.Fatalf("bad section length: %d\n", len(section.Resources))
 	}
-	if section.Resources["test"] != "foobar" {
+	if section.Resources["test"] != "foobar # not a comment" {
 		t.Fatalf("missing or wrong test key: %s", section.Resources["test"])
 	}
 }
 
 func TestReadAnonymousAndNamed(t *testing.T) {
 	in := strings.NewReader("titi = toto\n[s1] ignored\ntest = foobar\nfoo	=\tbar\n\n[s2]\nwhatever=    nothing\n")
-	file, err := Read(in)
+	file, err := Read(in, "foo")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if file.Name != "foo" {
+		t.Fatalf("bad file name: '%s'\n", file.Name)
 	}
 	if len(file.Anonymous.Resources) != 1 {
 		t.Fatalf("bad anonymous length: %d\n", len(file.Anonymous.Resources))
