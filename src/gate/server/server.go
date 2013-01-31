@@ -266,6 +266,10 @@ func (self *server) Unset(key string, reply *bool) (err error) {
 func (self *server) Stop(status int, reply *bool) (err error) {
 	log.Printf("Stop(status=%d)", status)
 	if self.vault.IsOpen() {
+		err = self.vault.Save(false, self.config)
+		if err != nil {
+			return
+		}
 		err = self.vault.Close()
 		if err != nil {
 			return
