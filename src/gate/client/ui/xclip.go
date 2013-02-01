@@ -68,7 +68,7 @@ func xclip(name string, selection string) (err error) {
 
 	run := func (cmd *exec.Cmd) (err error) {
 		p := <-pipe
-		p.Write([]byte(name+"\n"))
+		p.Write([]byte(name))
 		err = p.Close()
 		if err != nil {
 			return errors.Decorated(err)
