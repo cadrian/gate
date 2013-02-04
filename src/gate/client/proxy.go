@@ -115,7 +115,7 @@ func readNewMaster(mmi ui.UserInteraction, reason string) (result string, err er
 }
 
 func openVault(srv server.Server, config core.Config) (err error) {
-	xdg, err := core.Xdg()
+	xdg, err := config.Xdg()
 	if err != nil {
 		return
 	}

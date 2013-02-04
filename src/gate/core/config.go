@@ -37,7 +37,11 @@ type Config interface {
 	// "config.rc" itself is ommitted
 	ListConfigFiles() ([]string, error)
 
+	// The path of the live vault
 	VaultPath() (string, error)
+
+	// Access to the XDG context
+	Xdg() (XdgContext, error)
 }
 
 type config struct {
@@ -45,6 +49,8 @@ type config struct {
 	vault string
 	main_rc string
 }
+
+var _ Config = &config{}
 
 // Get the user configuration
 func NewConfig() (result Config, err error) {
@@ -67,7 +73,7 @@ func NewConfig() (result Config, err error) {
 }
 
 func (self *config) ListConfigFiles() (result []string, err error) {
-	xdg, err := Xdg()
+	xdg, err := self.Xdg()
 	if err != nil {
 		return
 	}
@@ -100,7 +106,7 @@ func (self *config) findFile(file string) (result *rc.File, err error) {
 		return
 	}
 
-	xdg, err := Xdg()
+	xdg, err := self.Xdg()
 	if err != nil {
 		return
 	}
@@ -313,7 +319,7 @@ func (self *config) Eval(file string, section string, key string, evaluator func
 }
 
 func (self *config) getVaultPath() (result string, err error) {
-	xdg, err := Xdg()
+	xdg, err := self.Xdg()
 	if err != nil {
 		return
 	}
@@ -334,4 +340,8 @@ func (self *config) VaultPath() (result string, err error) {
 		}
 	}
 	return
+}
+
+func (self *config) Xdg() (XdgContext, error) {
+	return xdgSingleton()
 }

@@ -27,7 +27,7 @@ gate/server Server
 gate/client/commands Commander,Command
 gate/client/remote Remoter,Remote,Proxy
 gate/client/ui UserInteraction
-gate/core Config
+gate/core Config,XdgContext
 EOF
 
 $ECHO Launching tests

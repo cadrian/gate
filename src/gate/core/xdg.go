@@ -78,7 +78,7 @@ func getdirs(env string, home string, dflt string) []string {
 }
 
 // Returns the XDG context
-func Xdg() (result XdgContext, err error) {
+func xdgSingleton() (result XdgContext, err error) {
 	if xdg == nil {
 		var (
 			data string
