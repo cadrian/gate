@@ -16,6 +16,11 @@
 package commands
 
 import (
+	"gate/core/errors"
+	"gate/server"
+)
+
+import (
 	"fmt"
 )
 
@@ -28,7 +33,67 @@ func (self *cmd_merge) Name() string {
 }
 
 func (self *cmd_merge) Run(line []string) (err error) {
-	fmt.Println("not yet implemented")
+	var remoteName string
+	if len(line) > 1 {
+		remoteName = line[1]
+	} else {
+		remoteName = ""
+	}
+
+	remote, err := self.remoter.Remote(remoteName)
+	if err != nil {
+		return
+	}
+
+	xdg, err := self.config.Xdg()
+	if err != nil {
+		return
+	}
+
+	dir, err := xdg.RuntimeDir()
+	if err != nil {
+		return
+	}
+
+	merge_vault := fmt.Sprintf("%s/merge_vault", dir)
+
+	err = remote.LoadVault(merge_vault)
+	if err != nil {
+		return
+	}
+
+	pass, err := self.mmi.ReadPassword(`Please enter the encryption phrase
+to the remote vault`)
+	if err != nil {
+		return
+	}
+
+	if pass != "" {
+		var merged bool
+		err = self.server.Merge(server.MergeArgs{merge_vault, pass}, &merged)
+		if err != nil {
+			return
+		}
+		if !merged {
+			err = errors.Newf("Could not merge %s", merge_vault)
+			return
+		}
+
+		cmd := self.commander.Command("save")
+		err = cmd.Run(line)
+		if err != nil {
+			return
+		}
+
+		var vault_path string
+		vault_path, err = self.config.VaultPath()
+		if err != nil {
+			return
+		}
+
+		err = remote.SaveVault(vault_path)
+	}
+
 	return
 }
 
