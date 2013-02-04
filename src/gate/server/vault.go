@@ -54,6 +54,7 @@ type Vault interface {
 	SetRandom(name string, recipe string) error
 	SetPass(name string, pass string) error
 	Unset(name string) error
+	SetMaster(master string) error
 }
 
 type vault struct {
@@ -355,5 +356,15 @@ func (self *vault) SetPass(name string, pass string) (err error) {
 		self.data[name] = k
 	}
 	self.dirty = true
+	return
+}
+
+func (self *vault) SetMaster(master string) (err error) {
+	if master == "" {
+		err = errors.Newf("empty master not allowed")
+	} else {
+		self.master = master
+		self.dirty = true
+	}
 	return
 }

@@ -16,7 +16,7 @@
 package commands
 
 import (
-	"fmt"
+	"gate/core/errors"
 )
 
 type cmd_master cmd
@@ -28,7 +28,35 @@ func (self *cmd_master) Name() string {
 }
 
 func (self *cmd_master) Run(line []string) (err error) {
-	fmt.Println("not yet implemented")
+	pass1, err := self.mmi.ReadPassword("Please enter the new master password")
+	if err != nil {
+		return
+	}
+	if pass1 == "" {
+		err = errors.Newf("Cancelled")
+		return
+	}
+
+	pass2, err := self.mmi.ReadPassword("Please enter the new master password (again)")
+	if err != nil {
+		return
+	}
+
+	if pass1 != pass2 {
+		err = errors.Newf("Passwords don't match")
+		return
+	}
+
+	var changed bool
+	err = self.server.SetMaster(pass1, &changed)
+	if err != nil {
+		return
+	}
+
+	if !changed {
+		err = errors.Newf("Could not change master")
+	}
+
 	return
 }
 

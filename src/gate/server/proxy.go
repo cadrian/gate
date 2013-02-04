@@ -129,6 +129,14 @@ func (self *proxy) Stop(status int, reply *bool) (err error) {
 	return
 }
 
+func (self *proxy) SetMaster(master string, reply *bool) (err error) {
+	err = self.client.Call("Gate.SetMaster", master, reply)
+	if err != nil {
+		err = errors.Decorated(err)
+	}
+	return
+}
+
 func (self *proxy) Ping(info string, reply *string) (err error) {
 	err = self.client.Call("Gate.Ping", info, reply)
 	if err != nil {

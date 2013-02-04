@@ -59,6 +59,7 @@ type Server interface {
 	Save(force bool, reply *bool) error
 	Stop(status int, reply *bool) error
 	Ping(info string, reply *string) error
+	SetMaster(master string, reply *bool) error
 }
 
 // A server-side server and extra (non-exported) methods
@@ -285,6 +286,18 @@ func (self *server) Stop(status int, reply *bool) (err error) {
 func (self *server) Ping(info string, reply *string) (err error) {
 	log.Printf("Ping(info='%s')", info)
 	*reply = info
+	return
+}
+
+func (self *server) SetMaster(master string, reply *bool) (err error) {
+	log.Printf("SetMaster(master='***')")
+	if !self.vault.IsOpen() {
+		return errors.Newf("Vault is not open: cannot set master")
+	}
+	err = self.vault.SetMaster(master)
+	if err == nil {
+		*reply = true
+	}
 	return
 }
 

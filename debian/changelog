@@ -2,6 +2,7 @@ gate (0.0.2) unstable; urgency=low
 
   * #1 - don't paste newline
   * #2 - port merge
+  * #3 - change master password
 
  -- Cyril Adrian <cyril.adrian@gmail.com>  Fri, 01 Feb 2013 09:19:47 +0100
 
