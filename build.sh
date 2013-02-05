@@ -9,6 +9,9 @@ export TMPDIR=${TMPDIR:-$GOPATH/.tmp} # because /tmp may have noexec option
 
 mkdir -p $TMPDIR
 
+$ECHO Cleaning up
+rm -rf bin pkg
+
 $ECHO Fetching deps
 go get github.com/sbinet/liner
 go get code.google.com/p/gomock/gomock
@@ -51,7 +54,7 @@ $ECHO Building Gate executables using "'$BUILD'"
 find src -name main.go -print | while read main_go; do
     main=$(dirname $main_go)
     exe=${main#src/}
-    $ECHO Building $(basename $exe)
+    $ECHO " - "$(basename $exe)
     eval "$compile $exe"
 done
 
