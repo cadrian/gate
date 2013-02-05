@@ -1,13 +1,17 @@
+gate (0.0.3) unstable; urgency=low
+
+	* fix dependency
+
 gate (0.0.2) unstable; urgency=low
 
-  * #1 - don't paste newline
-  * #2 - port merge
-  * #3 - change master password
+	* #1 - don't paste newline
+	* #2 - port merge
+	* #3 - change master password
 
  -- Cyril Adrian <cyril.adrian@gmail.com>  Tue, 05 Feb 2013 19:50:23 +0100
 
 gate (0.0.1) unstable; urgency=low
 
-  * Initial Release.
+	* Initial Release.
 
  -- Cyril Adrian <cyril.adrian@gmail.com>  Thu, 31 Jan 2013 18:31:26 +0100
