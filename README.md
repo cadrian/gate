@@ -173,16 +173,9 @@ exploitable.
 
 # Installation
 
-There are several distinct ways of installing Gate.
+Gate is provided as a debian package in my PPA. Follow the
+instructions below to install the package:
 
-## From soure
+    wget -O - http://apt.cadrian.net/public.key | sudo apt-key add -
 
-To install Gate from source, you need to first install the *go* compiler.
-
-## Linux binary
-
-Just launch the provided `install.sh` script.
-
-## Linux "on-key" binary
-
-Useful for installation on USB keys or any removable media.
+    deb http://apt.cadrian.net unstable main
