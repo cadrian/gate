@@ -18,10 +18,10 @@ package client
 // Functions specific to the "menu" command
 
 import (
+	"gate/client/ui"
 	"gate/core"
 	"gate/core/errors"
 	"gate/core/exec"
-	"gate/client/ui"
 	"gate/server"
 )
 
@@ -40,7 +40,6 @@ func clipboard(mmi ui.UserInteraction, out io.Reader, barrier chan error) {
 		return
 	}
 	name := string(buffer.Bytes()[:n-1])
-
 
 	err = mmi.XclipPassword(name)
 
@@ -65,7 +64,7 @@ func displayMenu(config core.Config, srv server.Server, list []string) (err erro
 	barrier := make(chan error)
 	pipe := make(chan io.WriteCloser, 1)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		p, err := cmd.StdinPipe()
 		if err != nil {
 			return errors.Decorated(err)
@@ -87,7 +86,7 @@ func displayMenu(config core.Config, srv server.Server, list []string) (err erro
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		p := <-pipe
 
 		for _, entry := range list {

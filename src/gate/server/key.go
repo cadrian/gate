@@ -35,8 +35,8 @@ type Key interface {
 var _ Key = &key{}
 
 type key struct {
-	name string
-	pass string
+	name     string
+	pass     string
 	delcount int64
 	addcount int64
 }

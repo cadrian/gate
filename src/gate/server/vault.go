@@ -58,12 +58,12 @@ type Vault interface {
 }
 
 type vault struct {
-	data map[string]*key
-	dirty bool
-	in In
-	out Out
-	open bool
-	master string
+	data    map[string]*key
+	dirty   bool
+	in      In
+	out     Out
+	open    bool
+	master  string
 	recipes map[string]Generator
 }
 
@@ -76,9 +76,9 @@ func finalize(v *vault) {
 // Create a new vault.
 func NewVault(in In, out Out) (result Vault) {
 	v := &vault{
-		data: make(map[string]*key),
-		in: in,
-		out: out,
+		data:    make(map[string]*key),
+		in:      in,
+		out:     out,
 		recipes: make(map[string]Generator, 32),
 	}
 	runtime.SetFinalizer(v, finalize)
@@ -128,8 +128,8 @@ func (self *vault) decode(out io.ReadCloser, barrier chan error) {
 			}
 
 			k := &key{
-				name: name,
-				pass: pass,
+				name:     name,
+				pass:     pass,
 				delcount: delcount,
 				addcount: addcount,
 			}
@@ -154,7 +154,7 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 
 	barrier := make(chan error)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", master))
 		cmd.Stdin = instream
 
@@ -168,7 +168,7 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		e := <-barrier
 		if e != io.EOF {
 			err = errors.Decorated(e)
@@ -271,7 +271,7 @@ func (self *vault) save(config core.Config) (err error) {
 
 	pipe := make(chan io.WriteCloser, 1)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		cmd.Env = append(os.Environ(), fmt.Sprintf("VAULT_MASTER=%s", self.master))
 		cmd.Stdout = outstream
 		p, err := cmd.StdinPipe()
@@ -282,7 +282,7 @@ func (self *vault) save(config core.Config) (err error) {
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		p := <-pipe
 		for _, k := range self.data {
 			code := k.Encoded()
@@ -348,8 +348,8 @@ func (self *vault) SetPass(name string, pass string) (err error) {
 		k.SetPassword(pass)
 	} else {
 		k = &key{
-			name: name,
-			pass: pass,
+			name:     name,
+			pass:     pass,
 			delcount: 0,
 			addcount: 1,
 		}

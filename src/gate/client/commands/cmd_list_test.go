@@ -38,7 +38,7 @@ func TestListRun1(t *testing.T) {
 	mmi := ui.NewMockUserInteraction(ctrl)
 	list := &cmd_list{cmd, rem, srv, cfg, mmi}
 
-	srv.EXPECT().List(".*", gomock.Any()).Do(func (filter string, reply *[]string) {
+	srv.EXPECT().List(".*", gomock.Any()).Do(func(filter string, reply *[]string) {
 		*reply = []string{"key1", "key2"}
 	})
 	mmi.EXPECT().Pager("key1\nkey2\n")

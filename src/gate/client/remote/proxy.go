@@ -35,17 +35,17 @@ type proxy struct {
 var _ Proxy = &proxy{}
 
 var ProxyAllowedKeys map[string]bool = map[string]bool{
-	"host": true,
-	"port": false,
+	"host":     true,
+	"port":     false,
 	"protocol": false,
-	"user": false,
-	"pass": false,
+	"user":     false,
+	"pass":     false,
 }
 
 func newProxy() Proxy {
-	return &proxy {
-		properties {
-			allowed: ProxyAllowedKeys,
+	return &proxy{
+		properties{
+			allowed:    ProxyAllowedKeys,
 			properties: make(map[string]string),
 		},
 	}

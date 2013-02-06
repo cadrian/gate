@@ -18,9 +18,9 @@ package commands
 import (
 	"gate/client/remote"
 	"gate/client/ui"
-	"gate/server"
 	"gate/core"
 	"gate/core/errors"
+	"gate/server"
 )
 
 import (
@@ -40,7 +40,7 @@ func TestStopRun(t *testing.T) {
 	mmi := ui.NewMockUserInteraction(ctrl)
 	stop := &cmd_stop{cmd, rem, srv, cfg, mmi}
 
-	srv.EXPECT().Stop(0, gomock.Any()).Do(func (_ int, reply *bool) {
+	srv.EXPECT().Stop(0, gomock.Any()).Do(func(_ int, reply *bool) {
 		*reply = true
 	})
 
@@ -61,7 +61,7 @@ func TestStopRun_could_not_stop(t *testing.T) {
 	mmi := ui.NewMockUserInteraction(ctrl)
 	stop := &cmd_stop{cmd, rem, srv, cfg, mmi}
 
-	srv.EXPECT().Stop(0, gomock.Any()).Do(func (_ int, reply *bool) {
+	srv.EXPECT().Stop(0, gomock.Any()).Do(func(_ int, reply *bool) {
 		*reply = false
 	})
 

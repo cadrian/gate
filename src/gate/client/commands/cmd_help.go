@@ -32,7 +32,7 @@ func (self *cmd_help) Run(line []string) (err error) {
 
 	var (
 		header, extra string
-		help []string
+		help          []string
 	)
 
 	if len(line) == 1 {

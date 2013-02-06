@@ -41,7 +41,7 @@ type Commander interface {
 
 type commander struct {
 	commands map[string]Command
-	defcmd string
+	defcmd   string
 }
 
 var _ Commander = &commander{}
@@ -55,16 +55,16 @@ type Command interface {
 
 type cmd struct {
 	commander Commander
-	remoter remote.Remoter
-	server server.Server
-	config core.Config
-	mmi ui.UserInteraction
+	remoter   remote.Remoter
+	server    server.Server
+	config    core.Config
+	mmi       ui.UserInteraction
 }
 
 func NewCommander(remoter remote.Remoter, srv server.Server, config core.Config, mmi ui.UserInteraction) (result Commander, err error) {
 	cmd := &commander{
 		commands: make(map[string]Command),
-		defcmd: "get",
+		defcmd:   "get",
 	}
 	result = cmd
 

@@ -16,10 +16,10 @@
 package commands
 
 import (
-	"gate/core"
-	"gate/core/errors"
 	"gate/client/remote"
 	"gate/client/ui"
+	"gate/core"
+	"gate/core/errors"
 	"gate/server"
 )
 
@@ -36,7 +36,7 @@ type cmd_remote struct {
 var _ CompositeCommand = &cmd_remote{}
 
 func newRemote(host_commander Commander, remoter remote.Remoter, srv server.Server, config core.Config, mmi ui.UserInteraction) *cmd_remote {
-	command := &cmd {
+	command := &cmd{
 		host_commander,
 		remoter,
 		srv,
@@ -44,7 +44,7 @@ func newRemote(host_commander Commander, remoter remote.Remoter, srv server.Serv
 		mmi,
 	}
 
-	cmder := &commander {
+	cmder := &commander{
 		make(map[string]Command),
 		"list",
 	}
@@ -86,8 +86,8 @@ func (self *cmd_remote) Complete(line []string) (result []string, err error) {
 
 func (self *cmd_remote) Help(line []string) (result string, err error) {
 	var (
-		cmd Command
-		remotes []string
+		cmd      Command
+		remotes  []string
 		commands []string
 	)
 	if len(line) > 1 {
@@ -98,8 +98,8 @@ func (self *cmd_remote) Help(line []string) (result string, err error) {
 	} else {
 		var (
 			commands_help []string
-			remotes_help string
-			h string
+			remotes_help  string
+			h             string
 		)
 
 		commands, err = self.Commands("")

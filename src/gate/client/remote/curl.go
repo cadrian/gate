@@ -35,17 +35,17 @@ type curl remote
 var _ Remote = &curl{}
 
 var CurlAllowedKeys map[string]bool = map[string]bool{
-	"url": true,
-	"user": false,
-	"passkey": false,
+	"url":         true,
+	"user":        false,
+	"passkey":     false,
 	"put_request": false,
 	"get_request": false,
 }
 
 func newCurl(name string, srv server.Server, config core.Config, remoter Remoter) (Remote, error) {
-	result := &curl {
-		properties {
-			allowed: CurlAllowedKeys,
+	result := &curl{
+		properties{
+			allowed:    CurlAllowedKeys,
 			properties: make(map[string]string),
 		},
 		srv,
@@ -103,7 +103,7 @@ func (self *curl) doCurl(option, file, request string) (err error) {
 		return
 	}
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		if self.proxy != nil {
 			self.proxy.Install(cmd)
 		}

@@ -16,8 +16,8 @@
 package main
 
 import (
-	"gate/core"
 	"gate/client"
+	"gate/core"
 )
 
 import (

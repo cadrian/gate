@@ -40,7 +40,7 @@ func Proxy(host string, port int, wait bool) (result Server, err error) {
 	endpoint := fmt.Sprintf("%s:%d", host, port)
 	client, err = rpc.DialHTTP("tcp", endpoint)
 	if wait {
-		for delay := 100 * time.Millisecond; err != nil && delay <= 3 * time.Second; delay *= 2 {
+		for delay := 100 * time.Millisecond; err != nil && delay <= 3*time.Second; delay *= 2 {
 			// if the server just started, maybe it needs time to settle
 			time.Sleep(delay)
 			client, err = rpc.DialHTTP("tcp", endpoint)

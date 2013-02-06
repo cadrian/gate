@@ -29,7 +29,7 @@ import (
 
 // The content of a file.
 type FileContent struct {
-	data []rune
+	data  []rune
 	index int
 }
 
@@ -163,8 +163,8 @@ func (self *FileContent) Debug() (result string) {
 func ReadFile(in io.Reader) (result *FileContent) {
 	data := &bytes.Buffer{}
 	data.ReadFrom(in)
-	result = &FileContent {
-		data: []rune(string(data.Bytes())),
+	result = &FileContent{
+		data:  []rune(string(data.Bytes())),
 		index: 0,
 	}
 	return

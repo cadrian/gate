@@ -27,7 +27,7 @@ import (
 )
 
 type properties struct {
-	allowed map[string]bool
+	allowed    map[string]bool
 	properties map[string]string
 }
 

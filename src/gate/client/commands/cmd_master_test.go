@@ -43,7 +43,7 @@ func TestSetMaster1(t *testing.T) {
 	mmi.EXPECT().ReadPassword(gomock.Any()).Return(pass, nil)
 	mmi.EXPECT().ReadPassword(gomock.Any()).Return(pass, nil)
 
-	srv.EXPECT().SetMaster(pass, gomock.Any()).Do(func (_ string, reply *bool) {
+	srv.EXPECT().SetMaster(pass, gomock.Any()).Do(func(_ string, reply *bool) {
 		*reply = true
 	})
 

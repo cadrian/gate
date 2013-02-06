@@ -45,11 +45,11 @@ type XdgContext interface {
 }
 
 type xdgContext struct {
-	data_dirs []string
+	data_dirs   []string
 	config_dirs []string
-	cache_home string
+	cache_home  string
 	runtime_dir string
-	data_home string
+	data_home   string
 	config_home string
 }
 
@@ -67,11 +67,11 @@ func getenv(name string, ext func(string) string, def func() string) (result str
 }
 
 func getdirs(env string, home string, dflt string) []string {
-	def := func () string {
+	def := func() string {
 		return dflt
 	}
 	dirs := strings.Split(getenv(env, nil, def), ":")
-	result := make([]string, 0, len(dirs) + 1)
+	result := make([]string, 0, len(dirs)+1)
 	result = append(result, home)
 	result = append(result, dirs...)
 	return result
@@ -81,11 +81,10 @@ func getdirs(env string, home string, dflt string) []string {
 func xdgSingleton() (result XdgContext, err error) {
 	if xdg == nil {
 		var (
-			data string
+			data   string
 			config string
 		)
-		xdg = &xdgContext{
-		}
+		xdg = &xdgContext{}
 		data, err = xdg.dataHome()
 		if err != nil {
 			return
@@ -109,7 +108,7 @@ func checkdir(dirname string) (result string, err error) {
 			err = errors.Newf("%s is not a directory", dirname)
 		}
 	} else {
-		err = os.MkdirAll(dirname, os.ModeDir | 0700)
+		err = os.MkdirAll(dirname, os.ModeDir|0700)
 		if err != nil {
 			err = errors.Decorated(err)
 		}
@@ -149,7 +148,7 @@ func (self *xdgContext) ReadConfig(file string) (io.ReadCloser, string, error) {
 
 func (self *xdgContext) CacheHome() (string, error) {
 	if self.cache_home == "" {
-		def := func () string {
+		def := func() string {
 			return fmt.Sprintf("%s/.cache/gate", getenv("HOME", nil, nil))
 		}
 		self.cache_home = getenv("XDG_CACHE_HOME", nil, def)
@@ -159,13 +158,13 @@ func (self *xdgContext) CacheHome() (string, error) {
 
 func (self *xdgContext) RuntimeDir() (string, error) {
 	if self.runtime_dir == "" {
-		tmpext := func (tmp string) string {
+		tmpext := func(tmp string) string {
 			return fmt.Sprintf("%s/gate", tmp)
 		}
-		tmpdef := func () string {
+		tmpdef := func() string {
 			return fmt.Sprintf("/tmp/gate-%s", getenv("USER", nil, nil))
 		}
-		xdgdef := func () string {
+		xdgdef := func() string {
 			return getenv("TMPDIR", tmpext, tmpdef)
 		}
 		self.runtime_dir = getenv("XDG_RUNTIME_DIR", nil, xdgdef)
@@ -175,7 +174,7 @@ func (self *xdgContext) RuntimeDir() (string, error) {
 
 func (self *xdgContext) dataHome() (string, error) {
 	if self.data_home == "" {
-		def := func () string {
+		def := func() string {
 			return fmt.Sprintf("%s/.local/share", getenv("HOME", nil, nil))
 		}
 		self.data_home = getenv("XDG_DATA_HOME", nil, def)
@@ -193,7 +192,7 @@ func (self *xdgContext) DataHome() (result string, err error) {
 
 func (self *xdgContext) configHome() (string, error) {
 	if self.config_home == "" {
-		def := func () string {
+		def := func() string {
 			return fmt.Sprintf("%s/.config", getenv("HOME", nil, nil))
 		}
 		self.config_home = getenv("XDG_CONFIG_HOME", nil, def)

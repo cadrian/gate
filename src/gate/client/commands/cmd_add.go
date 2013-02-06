@@ -42,7 +42,7 @@ func (self *cmd_add) generateArgs(key string, recipe string) (result server.SetA
 		}
 	}
 	result = server.SetArgs{
-		Key: key,
+		Key:    key,
 		Recipe: recipe,
 	}
 	return
@@ -54,7 +54,7 @@ func (self *cmd_add) promptArgs(key string) (result server.SetArgs, err error) {
 		return
 	}
 	result = server.SetArgs{
-		Key: key,
+		Key:  key,
 		Pass: pass,
 	}
 	return

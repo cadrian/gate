@@ -44,7 +44,7 @@ func TestSaveRun1(t *testing.T) {
 	path := "vault_path"
 	cfg.EXPECT().VaultPath().Return(path, nil)
 
-	srv.EXPECT().Save(true, gomock.Any()).Do(func (_ bool, reply *bool) {
+	srv.EXPECT().Save(true, gomock.Any()).Do(func(_ bool, reply *bool) {
 		*reply = true
 	})
 
@@ -73,7 +73,7 @@ func TestSaveRun2(t *testing.T) {
 	path := "vault_path"
 	cfg.EXPECT().VaultPath().Return(path, nil)
 
-	srv.EXPECT().Save(true, gomock.Any()).Do(func (_ bool, reply *bool) {
+	srv.EXPECT().Save(true, gomock.Any()).Do(func(_ bool, reply *bool) {
 		*reply = true
 	})
 

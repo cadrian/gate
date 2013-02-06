@@ -30,7 +30,7 @@ type Cmd exec.Cmd
 // Spawn a given command.
 //  - prepare() is called after the command creation but before actually starting it
 //  - run() is called while the command is running and before waiting for its completion
-func Command(prepare func(cmd *Cmd) error, run func(cmd *Cmd) error, command string, arguments... string) (err error) {
+func Command(prepare func(cmd *Cmd) error, run func(cmd *Cmd) error, command string, arguments ...string) (err error) {
 	cmd := exec.Command(command, arguments...)
 
 	if prepare != nil {

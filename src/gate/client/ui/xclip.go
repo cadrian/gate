@@ -57,7 +57,7 @@ func (self *interaction) XclipPassword(name string) (err error) {
 func xclip(name string, selection string) (err error) {
 	pipe := make(chan io.WriteCloser, 1)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		p, err := cmd.StdinPipe()
 		if err != nil {
 			return errors.Decorated(err)
@@ -66,7 +66,7 @@ func xclip(name string, selection string) (err error) {
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		p := <-pipe
 		p.Write([]byte(name))
 		err = p.Close()

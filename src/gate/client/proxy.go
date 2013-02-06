@@ -48,7 +48,7 @@ func dirname() (result string) {
 func startServer() (err error) {
 	pipe := make(chan io.WriteCloser, 1)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		p, err := cmd.StdinPipe()
 		if err != nil {
 			return errors.Decorated(err)
@@ -57,7 +57,7 @@ func startServer() (err error) {
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		p := <-pipe
 		dir := dirname()
 		var exe string
@@ -165,8 +165,8 @@ func proxy(config core.Config) (result server.Server, err error) {
 	if result == nil {
 		var (
 			host, p string
-			port int64
-			s server.Server
+			port    int64
+			s       server.Server
 		)
 		host, err = config.Eval("", "connection", "host", os.Getenv)
 		if err != nil {

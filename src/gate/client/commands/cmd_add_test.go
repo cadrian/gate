@@ -39,9 +39,9 @@ func TestAddRun2(t *testing.T) {
 	add := &cmd_add{cmd, rem, srv, cfg, mmi}
 
 	cfg.EXPECT().Eval("", "console", "default_recipe", gomock.Any()).Return("recipe", nil)
-	args := server.SetArgs{Key:"foo", Recipe:"recipe"}
+	args := server.SetArgs{Key: "foo", Recipe: "recipe"}
 
-	srv.EXPECT().Set(args, gomock.Any()).Do(func (_ server.SetArgs, pass *string) {
+	srv.EXPECT().Set(args, gomock.Any()).Do(func(_ server.SetArgs, pass *string) {
 		*pass = "password"
 	})
 
@@ -65,9 +65,9 @@ func TestAddRun3Generate(t *testing.T) {
 	add := &cmd_add{cmd, rem, srv, cfg, mmi}
 
 	cfg.EXPECT().Eval("", "console", "default_recipe", gomock.Any()).Return("recipe", nil)
-	args := server.SetArgs{Key:"foo", Recipe:"recipe"}
+	args := server.SetArgs{Key: "foo", Recipe: "recipe"}
 
-	srv.EXPECT().Set(args, gomock.Any()).Do(func (_ server.SetArgs, pass *string) {
+	srv.EXPECT().Set(args, gomock.Any()).Do(func(_ server.SetArgs, pass *string) {
 		*pass = "password"
 	})
 
@@ -91,9 +91,9 @@ func TestAddRun3Prompt(t *testing.T) {
 	add := &cmd_add{cmd, rem, srv, cfg, mmi}
 
 	mmi.EXPECT().ReadPassword("Please enter the new password for foo").Return("passwd", nil)
-	args := server.SetArgs{Key:"foo", Pass:"passwd"}
+	args := server.SetArgs{Key: "foo", Pass: "passwd"}
 
-	srv.EXPECT().Set(args, gomock.Any()).Do(func (_ server.SetArgs, pass *string) {
+	srv.EXPECT().Set(args, gomock.Any()).Do(func(_ server.SetArgs, pass *string) {
 		*pass = "password"
 	})
 
@@ -116,9 +116,9 @@ func TestAddRun4(t *testing.T) {
 	mmi := ui.NewMockUserInteraction(ctrl)
 	add := &cmd_add{cmd, rem, srv, cfg, mmi}
 
-	args := server.SetArgs{Key:"foo", Recipe:"recipe"}
+	args := server.SetArgs{Key: "foo", Recipe: "recipe"}
 
-	srv.EXPECT().Set(args, gomock.Any()).Do(func (_ server.SetArgs, pass *string) {
+	srv.EXPECT().Set(args, gomock.Any()).Do(func(_ server.SetArgs, pass *string) {
 		*pass = "password"
 	})
 

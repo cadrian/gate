@@ -26,9 +26,9 @@ type Section struct {
 }
 
 type File struct {
-	Name string
+	Name      string
 	Anonymous *Section
-	Sections map[string]*Section
+	Sections  map[string]*Section
 }
 
 func (self *File) readSection(content *FileContent) (result *Section, err error) {
@@ -48,7 +48,7 @@ func (self *File) readSection(content *FileContent) (result *Section, err error)
 			done = true
 		} else {
 			var (
-				key string
+				key   string
 				value string
 			)
 			_, err = content.SkipBlanks()
@@ -103,7 +103,7 @@ func (self *File) readNamedSection(content *FileContent) (err error) {
 	if content.IsValid() {
 		var (
 			sectionName string
-			section *Section
+			section     *Section
 		)
 		_, err = content.SkipSymbol("[")
 		if err != nil {
@@ -137,7 +137,7 @@ func (self *File) readNamedSection(content *FileContent) (err error) {
 // Read all the data (until EOF) and returns the configuration object.
 func Read(in io.Reader, name string) (result *File, err error) {
 	result = &File{
-		Name: name,
+		Name:     name,
 		Sections: make(map[string]*Section),
 	}
 	content := ReadFile(in)

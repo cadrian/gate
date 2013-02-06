@@ -40,7 +40,7 @@ type generator struct {
 var _ Generator = &generator{}
 
 type generator_mix struct {
-	quantity int
+	quantity   int
 	ingredient string
 }
 
@@ -85,28 +85,28 @@ func (self generator_mix) extend_pass(in io.Reader, pass string) (result string,
 	}
 	b1 := data[0]
 	b2 := data[1]
-	b := byte(int((b1 & 0x7f) << 8 + b2) % len(self.ingredient))
+	b := byte(int((b1&0x7f)<<8+b2) % len(self.ingredient))
 	i := int(data[2]) % (len(pass) + 1)
 	result = string(append(append(append(make([]byte, 0, len(pass)+1), pass[:i]...), b), pass[i:]...))
 	return
 }
 
 type parse_generator_context struct {
-	recipe []generator_mix
-	total_quantity int
-	last_quantity int
+	recipe          []generator_mix
+	total_quantity  int
+	last_quantity   int
 	last_ingredient string
-	index int
-	source string
+	index           int
+	source          string
 }
 
 // Return a generator using the given source.
 func NewGenerator(source string) (result Generator, err error) {
 	context := &parse_generator_context{
-		recipe: make([]generator_mix, 0, 128),
+		recipe:         make([]generator_mix, 0, 128),
 		total_quantity: 0,
-		index: 0,
-		source: source,
+		index:          0,
+		source:         source,
 	}
 	err = context.parse_recipe()
 	if err == nil {
@@ -140,7 +140,7 @@ func (self *parse_generator_context) parse_mix() (err error) {
 	self.recipe = append(
 		self.recipe,
 		generator_mix{
-			quantity: self.last_quantity,
+			quantity:   self.last_quantity,
 			ingredient: self.last_ingredient,
 		},
 	)
@@ -152,7 +152,7 @@ func (self *parse_generator_context) parse_quantity() (err error) {
 	for self.index < len(self.source) {
 		switch b := self.source[self.index]; {
 		case b >= '0' && b <= '9':
-			self.last_quantity = self.last_quantity * 10 + int(b - '0')
+			self.last_quantity = self.last_quantity*10 + int(b-'0')
 			self.index++
 		default:
 			break

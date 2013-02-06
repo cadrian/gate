@@ -45,8 +45,8 @@ type Config interface {
 }
 
 type config struct {
-	files map[string]*rc.File
-	vault string
+	files   map[string]*rc.File
+	vault   string
 	main_rc string
 }
 
@@ -66,7 +66,7 @@ func NewConfig() (result Config, err error) {
 	}
 
 	result = &config{
-		files: make(map[string]*rc.File),
+		files:   make(map[string]*rc.File),
 		main_rc: main_rc,
 	}
 	return
@@ -91,7 +91,7 @@ func (self *config) ListConfigFiles() (result []string, err error) {
 		err = errors.Decorated(err)
 		return
 	}
-	result = make([]string, 0, len(names) - 1)
+	result = make([]string, 0, len(names)-1)
 	for _, name := range names {
 		if name != "config.rc" && strings.HasSuffix(name, ".rc") {
 			result = append(result, name)
@@ -156,13 +156,13 @@ func (self *config) rawValue(file string, section string, key string) (result st
 }
 
 type eval_context struct {
-	out []rune
-	varname []rune
-	state int
+	out       []rune
+	varname   []rune
+	state     int
 	in_string bool
 }
 
-func (self *eval_context) append(b... rune) {
+func (self *eval_context) append(b ...rune) {
 	self.out = append(self.out, b...)
 }
 
@@ -289,7 +289,7 @@ func (self *eval_context) eval(env func(string) string, pb *rune) (next bool) {
 
 func eval(raw string, evaluator func(string) string) (result string) {
 	ctx := &eval_context{
-		out : make([]rune, 0, 2 * len(raw)),
+		out: make([]rune, 0, 2*len(raw)),
 	}
 	for _, b := range raw {
 		for next := false; !next; {

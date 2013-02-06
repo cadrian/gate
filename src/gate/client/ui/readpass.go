@@ -31,7 +31,7 @@ func (self *interaction) ReadPassword(text string) (result string, err error) {
 	if err != nil {
 		return
 	}
-	env := func (name string) string {
+	env := func(name string) string {
 		switch name {
 		case "TEXT":
 			return text
@@ -46,12 +46,12 @@ func (self *interaction) ReadPassword(text string) (result string, err error) {
 	buffer := &bytes.Buffer{}
 
 	type barrierData struct {
-		n int64
+		n   int64
 		err error
 	}
 	barrier := make(chan barrierData)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		out, err := cmd.StdoutPipe()
 		if err != nil {
 			return errors.Decorated(err)
@@ -66,7 +66,7 @@ func (self *interaction) ReadPassword(text string) (result string, err error) {
 
 	resulter := make(chan string, 1)
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		data := <-barrier
 		if data.err != nil {
 			return errors.Decorated(err)

@@ -28,7 +28,7 @@ import (
 func (self *interaction) Pager(text string) (err error) {
 	pipe := make(chan io.WriteCloser, 1)
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		p, err := cmd.StdinPipe()
@@ -39,7 +39,7 @@ func (self *interaction) Pager(text string) (err error) {
 		return
 	}
 
-	run := func (cmd *exec.Cmd) (err error) {
+	run := func(cmd *exec.Cmd) (err error) {
 		p := <-pipe
 		p.Write([]byte(text))
 		err = p.Close()

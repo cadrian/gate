@@ -35,7 +35,7 @@ type interaction struct {
 var _ UserInteraction = &interaction{}
 
 func Ui(srv server.Server, config core.Config) (result UserInteraction, err error) {
-	result = &interaction {
+	result = &interaction{
 		server: srv,
 		config: config,
 	}

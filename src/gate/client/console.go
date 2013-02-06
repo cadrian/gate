@@ -33,9 +33,9 @@ import (
 
 type readline struct {
 	commander commands.Commander
-	server server.Server
-	state *liner.State
-	lastline string
+	server    server.Server
+	state     *liner.State
+	lastline  string
 }
 
 func (self *readline) run(line []string) (err error) {
@@ -133,13 +133,13 @@ Just hit [33m<enter>[0m to exit.
 	state := liner.NewLiner()
 	defer state.Close()
 
-	rl := &readline {
+	rl := &readline{
 		commander: commander,
-		server: srv,
-		state: state,
+		server:    srv,
+		state:     state,
 	}
 
-	complete := func (line string) (result []string) {
+	complete := func(line string) (result []string) {
 		result, err := rl.complete(line)
 		if err != nil {
 			fmt.Println(err)

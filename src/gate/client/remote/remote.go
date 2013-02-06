@@ -31,8 +31,8 @@ type Remoter interface {
 }
 
 type remoter struct {
-	server server.Server
-	config core.Config
+	server  server.Server
+	config  core.Config
 	remotes map[string]Remote
 }
 
@@ -53,10 +53,10 @@ type Remote interface {
 
 type remote struct {
 	properties
-	server server.Server
+	server  server.Server
 	remoter Remoter
-	name string
-	proxy Proxy
+	name    string
+	proxy   Proxy
 }
 
 type Proxy interface {
@@ -68,9 +68,9 @@ type Proxy interface {
 }
 
 func NewRemoter(srv server.Server, config core.Config) Remoter {
-	return &remoter {
-		server: srv,
-		config: config,
+	return &remoter{
+		server:  srv,
+		config:  config,
 		remotes: make(map[string]Remote, 32),
 	}
 }
@@ -94,7 +94,7 @@ func (self *remoter) Remote(name string) (result Remote, err error) {
 }
 
 func (self *remoter) readRemote(name string) (result Remote, err error) {
-	method, err := self.config.Eval(name + ".rc", "remote", "method", nil)
+	method, err := self.config.Eval(name+".rc", "remote", "method", nil)
 	if err != nil {
 		return
 	}
@@ -110,7 +110,7 @@ func (self *remoter) readRemote(name string) (result Remote, err error) {
 }
 
 func escape_pass_url(data string) string {
-	buffer := make([]byte, 0, 3 * len(data))
+	buffer := make([]byte, 0, 3*len(data))
 	for _, b := range []byte(data) {
 		switch b {
 		case ' ':

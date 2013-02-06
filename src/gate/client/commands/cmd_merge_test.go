@@ -50,7 +50,7 @@ func TestMergeRun1(t *testing.T) {
 	pass := "remote pass"
 	mmi.EXPECT().ReadPassword(gomock.Any()).Return(pass, nil)
 
-	srv.EXPECT().Merge(server.MergeArgs{"runtimeDir/merge_vault", pass}, gomock.Any()).Do(func (_ server.MergeArgs, reply *bool) {
+	srv.EXPECT().Merge(server.MergeArgs{"runtimeDir/merge_vault", pass}, gomock.Any()).Do(func(_ server.MergeArgs, reply *bool) {
 		*reply = true
 	})
 
@@ -91,7 +91,7 @@ func TestMergeRun2(t *testing.T) {
 	pass := "remote pass"
 	mmi.EXPECT().ReadPassword(gomock.Any()).Return(pass, nil)
 
-	srv.EXPECT().Merge(server.MergeArgs{"runtimeDir/merge_vault", pass}, gomock.Any()).Do(func (_ server.MergeArgs, reply *bool) {
+	srv.EXPECT().Merge(server.MergeArgs{"runtimeDir/merge_vault", pass}, gomock.Any()).Do(func(_ server.MergeArgs, reply *bool) {
 		*reply = true
 	})
 

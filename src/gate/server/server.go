@@ -35,14 +35,14 @@ import (
 
 // Arguments to the "merge" operation.
 type MergeArgs struct {
-	Vault string
+	Vault  string
 	Master string
 }
 
 // Arguments to the "set" operation.
 type SetArgs struct {
-	Key string
-	Pass string
+	Key    string
+	Pass   string
 	Recipe string
 }
 
@@ -79,12 +79,12 @@ func (self *blockingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type server struct {
-	vault Vault
-	config core.Config
+	vault    Vault
+	config   core.Config
 	listener net.Listener
-	handler *blockingHandler
-	running bool
-	status chan int
+	handler  *blockingHandler
+	running  bool
+	status   chan int
 }
 
 type serverLocal struct {
@@ -114,7 +114,7 @@ func Start(config core.Config) (result ServerLocal, err error) {
 	}
 
 	srv := &server{
-		vault: newVault(vault_path),
+		vault:  newVault(vault_path),
 		config: config,
 		status: make(chan int),
 	}
@@ -143,7 +143,7 @@ func Start(config core.Config) (result ServerLocal, err error) {
 	}
 
 	go http.Serve(srv.listener, srv.handler)
-	result = &serverLocal {
+	result = &serverLocal{
 		server: srv,
 	}
 

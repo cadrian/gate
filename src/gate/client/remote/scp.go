@@ -36,16 +36,16 @@ type scp remote
 var _ Remote = &scp{}
 
 var ScpAllowedKeys map[string]bool = map[string]bool{
-	"file": true,
-	"host": true,
-	"user": false,
+	"file":    true,
+	"host":    true,
+	"user":    false,
 	"options": false,
 }
 
 func newScp(name string, srv server.Server, config core.Config, remoter Remoter) (Remote, error) {
-	result := &scp {
-		properties {
-			allowed: ScpAllowedKeys,
+	result := &scp{
+		properties{
+			allowed:    ScpAllowedKeys,
 			properties: make(map[string]string),
 		},
 		srv,
@@ -100,7 +100,7 @@ func (self *scp) LoadVault(file string) (err error) {
 		return
 	}
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		if self.proxy != nil {
 			self.proxy.Install(cmd)
 		}
@@ -122,7 +122,7 @@ func (self *scp) SaveVault(file string) (err error) {
 		return
 	}
 
-	prepare := func (cmd *exec.Cmd) (err error) {
+	prepare := func(cmd *exec.Cmd) (err error) {
 		if self.proxy != nil {
 			self.proxy.Install(cmd)
 		}

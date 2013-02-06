@@ -25,7 +25,7 @@ import (
 
 // An error and the corresponding stacktrace
 type StackError struct {
-	Nested error
+	Nested     error
 	StackTrace string
 }
 
@@ -43,7 +43,7 @@ func newerror(err error) error {
 	stacktrace := fmt.Sprintf("Traceback of %s\n%s", stack[0], strings.Join(stack[5:], "\n"))
 
 	return StackError{
-		Nested: err,
+		Nested:     err,
 		StackTrace: stacktrace,
 	}
 }
@@ -54,7 +54,7 @@ func New(message string) error {
 }
 
 // Create a brand new error using the provided format and arguments
-func Newf(format string, args... interface{}) error {
+func Newf(format string, args ...interface{}) error {
 	return newerror(errors.New(fmt.Sprintf(format, args...)))
 }
 
