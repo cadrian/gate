@@ -24,7 +24,6 @@ import (
 )
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -32,8 +31,6 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 // Return a reader
@@ -58,13 +55,15 @@ type Vault interface {
 }
 
 type vault struct {
-	data    map[string]*key
+	data    map[string]Key
 	dirty   bool
 	in      In
 	out     Out
 	open    bool
 	master  string
 	recipes map[string]Generator
+	decode  func(*vault, io.ReadCloser, chan error)
+	newkey  func(string, string) Key
 }
 
 var _ Vault = &vault{}
@@ -76,68 +75,16 @@ func finalize(v *vault) {
 // Create a new vault.
 func NewVault(in In, out Out) (result Vault) {
 	v := &vault{
-		data:    make(map[string]*key),
+		data:    make(map[string]Key),
 		in:      in,
 		out:     out,
 		recipes: make(map[string]Generator, 32),
+		decode:  bf_decode,
+		newkey:  bf_newkey,
 	}
 	runtime.SetFinalizer(v, finalize)
 	result = v
 	return
-}
-
-var decoder = regexp.MustCompile("(?P<name>[^:]+):(?P<add>[0-9]+):(?P<del>[0-9]+):(?P<pass>.*)")
-
-func decode_group(data string, name string, match []int) (result string) {
-	result = string(decoder.ExpandString(make([]byte, 0, 1024), fmt.Sprintf("${%s}", name), data, match))
-	return
-}
-
-func decode_group_int(data string, name string, match []int) (result int64, err error) {
-	s := decode_group(data, name, match)
-	result, err = strconv.ParseInt(s, 10, 64)
-	if err != nil {
-		return 0, errors.Decorated(err)
-	}
-	return
-}
-
-func (self *vault) decode(out io.ReadCloser, barrier chan error) {
-	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
-	_, err := buffer.ReadFrom(out)
-	if err != nil {
-		barrier <- err
-		return
-	}
-	data := string(buffer.Bytes())
-
-	for _, line := range strings.Split(data, "\n") {
-		if line != "" {
-			linematch := decoder.FindSubmatchIndex([]byte(line))
-			name := decode_group(line, "name", linematch)
-			pass := decode_group(line, "pass", linematch)
-			delcount, err := decode_group_int(line, "del", linematch)
-			if err != nil {
-				barrier <- err
-				continue
-			}
-			addcount, err := decode_group_int(line, "add", linematch)
-			if err != nil {
-				barrier <- err
-				continue
-			}
-
-			k := &key{
-				name:     name,
-				pass:     pass,
-				delcount: delcount,
-				addcount: addcount,
-			}
-			self.data[name] = k
-		}
-	}
-
-	barrier <- io.EOF
 }
 
 func (self *vault) Open(master string, config core.Config) (err error) {
@@ -163,7 +110,7 @@ func (self *vault) Open(master string, config core.Config) (err error) {
 			return errors.Decorated(err)
 		}
 
-		go self.decode(out, barrier)
+		go self.decode(self, out, barrier)
 
 		return
 	}
@@ -199,7 +146,7 @@ func (self *vault) Close(config core.Config) (err error) {
 		}
 	}
 
-	self.data = make(map[string]*key)
+	self.data = make(map[string]Key)
 	self.open = false
 	self.master = ""
 
@@ -347,12 +294,7 @@ func (self *vault) SetPass(name string, pass string) (err error) {
 	if ok {
 		k.SetPassword(pass)
 	} else {
-		k = &key{
-			name:     name,
-			pass:     pass,
-			delcount: 0,
-			addcount: 1,
-		}
+		k = self.newkey(name, pass)
 		self.data[name] = k
 	}
 	self.dirty = true

@@ -15,10 +15,14 @@
 
 package server
 
-// Vault keys
+import (
+	"gate/core/errors"
+)
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 )
 
 // A vault key
@@ -32,51 +36,16 @@ type Key interface {
 	SetPassword(pass string)
 }
 
-var _ Key = &key{}
-
-type key struct {
-	name     string
-	pass     string
-	delcount int64
-	addcount int64
+func decode_group(dec *regexp.Regexp, data string, name string, match []int) (result string) {
+	result = string(dec.ExpandString(make([]byte, 0, 1024), fmt.Sprintf("${%s}", name), data, match))
+	return
 }
 
-func (self *key) Name() string {
-	return self.name
-}
-
-func (self *key) Password() string {
-	if self.IsDeleted() {
-		return ""
+func decode_group_int(dec *regexp.Regexp, data string, name string, match []int) (result int64, err error) {
+	s := decode_group(dec, data, name, match)
+	result, err = strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, errors.Decorated(err)
 	}
-	return self.pass
-}
-
-func (self *key) IsDeleted() bool {
-	return self.delcount > self.addcount
-}
-
-func (self *key) Delete() {
-	self.delcount = self.addcount + 1
-}
-
-func (self *key) Encoded() string {
-	return fmt.Sprintf("%s:%d:%d:%s\n", self.name, self.addcount, self.delcount, self.pass)
-}
-
-func (self *key) Merge(other Key) {
-	okey := other.(*key)
-
-	if self.delcount < okey.delcount {
-		self.delcount = okey.delcount
-	}
-	if self.addcount < okey.addcount {
-		self.pass = okey.pass
-		self.addcount = okey.addcount
-	}
-}
-
-func (self *key) SetPassword(pass string) {
-	self.pass = pass
-	self.addcount = self.addcount + 1
+	return
 }
