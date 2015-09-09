@@ -15,4 +15,4 @@
 
 // This package contains all the functions specific to the server
 // implementation and access.
-package server
+package impl

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package impl
 
 // Keys vault management
 
@@ -55,15 +55,15 @@ type Vault interface {
 }
 
 type vault struct {
-	data    map[string]Key
-	dirty   bool
-	in      In
-	out     Out
-	open    bool
-	master  string
+	data	map[string]Key
+	dirty	bool
+	in	In
+	out	Out
+	open	bool
+	master	string
 	recipes map[string]Generator
-	decode  func(*vault, io.ReadCloser, chan error)
-	newkey  func(string, string) Key
+	decode	func(*vault, io.ReadCloser, chan error)
+	newkey	func(string, string) Key
 }
 
 var _ Vault = &vault{}
@@ -75,12 +75,12 @@ func finalize(v *vault) {
 // Create a new vault.
 func NewVault(in In, out Out) (result Vault) {
 	v := &vault{
-		data:    make(map[string]Key),
-		in:      in,
-		out:     out,
+		data:	 make(map[string]Key),
+		in:	 in,
+		out:	 out,
 		recipes: make(map[string]Generator, 32),
-		decode:  bf_decode,
-		newkey:  bf_newkey,
+		decode:	 bf_decode,
+		newkey:	 bf_newkey,
 	}
 	runtime.SetFinalizer(v, finalize)
 	result = v

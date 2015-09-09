@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package impl
 
 // Blowfish vault keys (now considered weak)
 
@@ -28,8 +28,8 @@ import (
 var _ Key = &bf_key{}
 
 type bf_key struct {
-	name     string
-	pass     string
+	name	 string
+	pass	 string
 	delcount int64
 	addcount int64
 }
@@ -102,8 +102,8 @@ func bf_decode(v *vault, out io.ReadCloser, barrier chan error) {
 			}
 
 			k := &bf_key{
-				name:     name,
-				pass:     pass,
+				name:	  name,
+				pass:	  pass,
 				delcount: delcount,
 				addcount: addcount,
 			}
@@ -116,8 +116,8 @@ func bf_decode(v *vault, out io.ReadCloser, barrier chan error) {
 
 func bf_newkey(name string, pass string) Key {
 	return &bf_key{
-		name:     name,
-		pass:     pass,
+		name:	  name,
+		pass:	  pass,
 		delcount: 0,
 		addcount: 1,
 	}

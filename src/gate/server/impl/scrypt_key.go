@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package impl
 
 // scrypt vault keys (strong keys)
 
@@ -30,9 +30,9 @@ import (
 var _ Key = &scrypt_key{}
 
 type scrypt_key struct {
-	name     string
-	salt     string
-	pass     string
+	name	 string
+	salt	 string
+	pass	 string
 	delcount int64
 	addcount int64
 }
@@ -111,9 +111,9 @@ func scrypt_decode(v *vault, out io.ReadCloser, barrier chan error) {
 			}
 
 			k := &scrypt_key{
-				name:     name,
-				salt:     string(salt),
-				pass:     pass,
+				name:	  name,
+				salt:	  string(salt),
+				pass:	  pass,
 				delcount: delcount,
 				addcount: addcount,
 			}
@@ -126,8 +126,8 @@ func scrypt_decode(v *vault, out io.ReadCloser, barrier chan error) {
 
 func scrypt_newkey(name string, pass string) Key {
 	k := &scrypt_key{
-		name:     name,
-		pass:     pass,
+		name:	  name,
+		pass:	  pass,
 		delcount: 0,
 		addcount: 1,
 	}

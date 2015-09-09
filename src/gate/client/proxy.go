@@ -23,6 +23,7 @@ import (
 	"gate/core/errors"
 	"gate/core/exec"
 	"gate/server"
+	serverimpl "gate/server/impl"
 )
 
 import (
@@ -74,7 +75,7 @@ func startServer() (err error) {
 			rc = os.Args[1]
 		}
 
-		p.Write([]byte(fmt.Sprintf("%s \"%s\" > /tmp/server-%s.log 2>&1\n", exe, rc, time.Now().Format("20060102150405"))))
+		p.Write([]byte(fmt.Sprintf("#!/bin/bash\n%s \"%s\" > /tmp/server-%s.log 2>&1 & disown\n", exe, rc, time.Now().Format("20060102150405"))))
 
 		err = p.Close()
 		if err != nil {
@@ -165,8 +166,8 @@ func proxy(config core.Config) (result server.Server, err error) {
 	if result == nil {
 		var (
 			host, p string
-			port    int64
-			s       server.Server
+			port	int64
+			s	server.Server
 		)
 		host, err = config.Eval("", "connection", "host", os.Getenv)
 		if err != nil {
@@ -181,13 +182,13 @@ func proxy(config core.Config) (result server.Server, err error) {
 			err = errors.Decorated(err)
 			return
 		}
-		s, err = server.Proxy(host, int(port), false)
+		s, err = serverimpl.Proxy(host, int(port), false)
 		if err != nil {
 			err = startServer()
 			if err != nil {
 				return
 			}
-			s, err = server.Proxy(host, int(port), true)
+			s, err = serverimpl.Proxy(host, int(port), true)
 			if err != nil {
 				return
 			}

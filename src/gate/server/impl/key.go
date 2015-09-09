@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package impl
 
 import (
 	"gate/core/errors"

@@ -13,30 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
-
-import (
-	"gate/core"
-	server "gate/server/impl"
-)
-
-import (
-	"log"
-	"os"
-)
-
-func main() {
-	cfg, err := core.NewConfig()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	srv, err := server.Start(cfg)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	status, err := srv.Wait()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	os.Exit(status)
-}
+// This package contains all the implementations of the client-server communication channels.
+// Currently: only go's native RPC over HTTP.
+package channel

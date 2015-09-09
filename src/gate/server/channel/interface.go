@@ -13,30 +13,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package channel
+
+// Channel interfaces
 
 import (
-	"gate/core"
-	server "gate/server/impl"
+	"gate/server"
 )
 
-import (
-	"log"
-	"os"
-)
+// General channel interface
+type Channel interface {
+	Disconnect()
+}
 
-func main() {
-	cfg, err := core.NewConfig()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	srv, err := server.Start(cfg)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	status, err := srv.Wait()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	os.Exit(status)
+// Server-side channel interface
+type ChannelServer interface {
+	server.Server
+	Channel
+	Bind() error
+}
+
+// Client-side channel interface
+type ChannelClient interface {
+	server.Server
+	Channel
+	Connect() error
 }

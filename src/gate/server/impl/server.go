@@ -13,85 +13,42 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package impl
 
 // Server-side (i.e. actual) server object
 
 import (
 	"gate/core"
 	"gate/core/errors"
+	"gate/server"
+	"gate/server/channel"
 )
 
 import (
-	"fmt"
 	"io"
 	"log"
-	"net"
-	"net/http"
-	"net/rpc"
 	"os"
-	"sync"
 )
-
-// Arguments to the "merge" operation.
-type MergeArgs struct {
-	Vault  string
-	Master string
-}
-
-// Arguments to the "set" operation.
-type SetArgs struct {
-	Key    string
-	Pass   string
-	Recipe string
-}
-
-// The server interface implemented both by the actual (server-side)
-// object and the proxy.
-type Server interface {
-	Open(master string, reply *bool) error
-	IsOpen(thenClose bool, reply *bool) error
-	Get(key string, reply *string) error
-	Set(args SetArgs, reply *string) error
-	Unset(key string, reply *bool) error
-	List(filter string, reply *[]string) error
-	Merge(args MergeArgs, reply *bool) error
-	Save(force bool, reply *bool) error
-	Stop(status int, reply *bool) error
-	Ping(info string, reply *string) error
-	SetMaster(master string, reply *bool) error
-}
 
 // A server-side server and extra (non-exported) methods
 type ServerLocal interface {
-	Server() Server
+	Server() server.Server
 	Wait() (int, error)
 }
 
-type blockingHandler struct {
-	lock *sync.RWMutex
-}
-
-func (self *blockingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	self.lock.RLock()
-	defer self.lock.RUnlock()
-	http.DefaultServeMux.ServeHTTP(w, r)
-}
-
-type server struct {
-	vault    Vault
-	config   core.Config
-	listener net.Listener
-	handler  *blockingHandler
-	running  bool
-	status   chan int
+type serverImpl struct {
+	vault	Vault
+	config	core.Config
+	channel channel.ChannelServer
+	running bool
+	status	chan int
 }
 
 type serverLocal struct {
-	server *server
+	server *serverImpl
 }
 
-var _ Server = &server{}
+var _ server.Server = &serverImpl{}
 var _ ServerLocal = &serverLocal{}
 
 func newVault(file string) Vault {
@@ -113,36 +70,19 @@ func Start(config core.Config) (result ServerLocal, err error) {
 		return
 	}
 
-	srv := &server{
-		vault:  newVault(vault_path),
-		config: config,
-		status: make(chan int),
+	srv := &serverImpl{
+		vault:	 newVault(vault_path),
+		config:	 config,
+		status:	 make(chan int),
+		running: true,
 	}
-	rpc.RegisterName("Gate", srv)
-	rpc.HandleHTTP()
+	srv.channel = channel.RpcChannelServer(config, srv)
 
-	host, e := config.Eval("", "connection", "host", os.Getenv)
-	if e != nil {
-		host = "127.0.0.1"
-	}
-	port, e := config.Eval("", "connection", "port", os.Getenv)
-	if e != nil {
-		port = "8532"
-	}
-
-	endpoint := fmt.Sprintf("%s:%s", host, port)
-	srv.listener, err = net.Listen("tcp", endpoint)
+	err = srv.channel.Bind()
 	if err != nil {
-		err = errors.Decorated(err)
 		return
 	}
-	srv.running = true
 
-	srv.handler = &blockingHandler{
-		lock: &sync.RWMutex{},
-	}
-
-	go http.Serve(srv.listener, srv.handler)
 	result = &serverLocal{
 		server: srv,
 	}
@@ -151,7 +91,7 @@ func Start(config core.Config) (result ServerLocal, err error) {
 	return
 }
 
-func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
+func (self *serverImpl) IsOpen(thenClose bool, reply *bool) (err error) {
 	log.Printf("IsOpen(thenClose=%t)", thenClose)
 	if self.vault.IsOpen() {
 		*reply = true
@@ -164,7 +104,7 @@ func (self *server) IsOpen(thenClose bool, reply *bool) (err error) {
 	return
 }
 
-func (self *server) Get(name string, reply *string) (err error) {
+func (self *serverImpl) Get(name string, reply *string) (err error) {
 	log.Printf("Get(name='%s')", name)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot get %s", name)
@@ -180,7 +120,7 @@ func (self *server) Get(name string, reply *string) (err error) {
 	return
 }
 
-func (self *server) List(filter string, reply *[]string) (err error) {
+func (self *serverImpl) List(filter string, reply *[]string) (err error) {
 	log.Printf("List(filter='%s')", filter)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot list")
@@ -189,7 +129,7 @@ func (self *server) List(filter string, reply *[]string) (err error) {
 	return
 }
 
-func (self *server) Open(master string, reply *bool) (err error) {
+func (self *serverImpl) Open(master string, reply *bool) (err error) {
 	log.Printf("Open(master='***')")
 	if self.vault.IsOpen() {
 		return errors.Newf("Vault is already open: cannot open")
@@ -199,7 +139,7 @@ func (self *server) Open(master string, reply *bool) (err error) {
 	return
 }
 
-func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
+func (self *serverImpl) Merge(args server.MergeArgs, reply *bool) (err error) {
 	log.Printf("Merge(vault='%s', master='***')", args.Vault)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot merge")
@@ -225,7 +165,7 @@ func (self *server) Merge(args MergeArgs, reply *bool) (err error) {
 	return
 }
 
-func (self *server) Save(force bool, reply *bool) (err error) {
+func (self *serverImpl) Save(force bool, reply *bool) (err error) {
 	log.Printf("Save(force=%t)", force)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot save")
@@ -238,7 +178,7 @@ func (self *server) Save(force bool, reply *bool) (err error) {
 	return
 }
 
-func (self *server) Set(args SetArgs, reply *string) (err error) {
+func (self *serverImpl) Set(args server.SetArgs, reply *string) (err error) {
 	log.Printf("Set(key='%s', ...)", args.Key)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot set")
@@ -255,7 +195,7 @@ func (self *server) Set(args SetArgs, reply *string) (err error) {
 	return
 }
 
-func (self *server) Unset(key string, reply *bool) (err error) {
+func (self *serverImpl) Unset(key string, reply *bool) (err error) {
 	log.Printf("Unset(key='%s')", key)
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot unset")
@@ -265,7 +205,7 @@ func (self *server) Unset(key string, reply *bool) (err error) {
 	return
 }
 
-func (self *server) Stop(status int, reply *bool) (err error) {
+func (self *serverImpl) Stop(status int, reply *bool) (err error) {
 	log.Printf("Stop(status=%d)", status)
 	if self.vault.IsOpen() {
 		err = self.vault.Close(self.config)
@@ -273,23 +213,19 @@ func (self *server) Stop(status int, reply *bool) (err error) {
 			return
 		}
 	}
-	err = self.listener.Close()
-	if err != nil {
-		return errors.Decorated(err)
-	}
 	self.running = false
 	self.status <- status
 	*reply = true
 	return
 }
 
-func (self *server) Ping(info string, reply *string) (err error) {
+func (self *serverImpl) Ping(info string, reply *string) (err error) {
 	log.Printf("Ping(info='%s')", info)
 	*reply = info
 	return
 }
 
-func (self *server) SetMaster(master string, reply *bool) (err error) {
+func (self *serverImpl) SetMaster(master string, reply *bool) (err error) {
 	log.Printf("SetMaster(master='***')")
 	if !self.vault.IsOpen() {
 		return errors.Newf("Vault is not open: cannot set master")
@@ -304,13 +240,13 @@ func (self *server) SetMaster(master string, reply *bool) (err error) {
 func (self *serverLocal) Wait() (result int, err error) {
 	if self.server.running {
 		result = <-self.server.status
-		self.server.handler.lock.Lock() // will never unlock, but the server is dead anyway (this barrier ensures that all connections are served)
+		self.server.channel.Disconnect()
 	} else {
 		err = errors.New("server not running")
 	}
 	return
 }
 
-func (self *serverLocal) Server() Server {
+func (self *serverLocal) Server() server.Server {
 	return self.server
 }

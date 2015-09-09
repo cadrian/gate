@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Gate.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package impl
 
 // A passwords generator
 
@@ -92,21 +92,21 @@ func (self generator_mix) extend_pass(in io.Reader, pass string) (result string,
 }
 
 type parse_generator_context struct {
-	recipe          []generator_mix
-	total_quantity  int
-	last_quantity   int
+	recipe		[]generator_mix
+	total_quantity	int
+	last_quantity	int
 	last_ingredient string
-	index           int
-	source          string
+	index		int
+	source		string
 }
 
 // Return a generator using the given source.
 func NewGenerator(source string) (result Generator, err error) {
 	context := &parse_generator_context{
-		recipe:         make([]generator_mix, 0, 128),
+		recipe:		make([]generator_mix, 0, 128),
 		total_quantity: 0,
-		index:          0,
-		source:         source,
+		index:		0,
+		source:		source,
 	}
 	err = context.parse_recipe()
 	if err == nil {
