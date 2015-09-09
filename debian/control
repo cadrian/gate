@@ -2,7 +2,7 @@ Source: gate
 Section: utils
 Priority: extra
 Maintainer: Cyril Adrian <cyril.adrian@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), golang | golang-stable | golang-weekly | golang-tip, docbook-to-man
+Build-Depends: debhelper (>= 8.0.0), golang (>= 1.4), docbook-to-man
 Standards-Version: 3.9.3
 Homepage: https://github.com/cadrian/gate
 Vcs-Git: git://github.com/cadrian/gate.git

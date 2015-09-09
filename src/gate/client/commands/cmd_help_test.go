@@ -1,5 +1,5 @@
 // This file is part of Gate.
-// Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>
+// Copyright (C) 2012-2015 Cyril Adrian <cyril.adrian@gmail.com>
 //
 // Gate is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import (
 )
 
 import (
-	"code.google.com/p/gomock/gomock"
+	"github.com/golang/mock/gomock"
 	"testing"
 )
 
@@ -58,7 +58,7 @@ help for bar
 Any other input is understood as a [33mget[0m command of the entry as key.
 
 [1m--------[0m
-[32mGate Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>[0m
+[32mGate Copyright (C) 2012-2015 Cyril Adrian <cyril.adrian@gmail.com>[0m
 [32mThis program comes with ABSOLUTELY NO WARRANTY; for details type [33mshow w[32m.[0m
 [32mThis is free software, and you are welcome to redistribute it[0m
 [32munder certain conditions; type [33mshow c[32m for details.[0m
@@ -93,7 +93,7 @@ func TestHelpRun2(t *testing.T) {
 help for foo
 
 [1m--------[0m
-[32mGate Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>[0m
+[32mGate Copyright (C) 2012-2015 Cyril Adrian <cyril.adrian@gmail.com>[0m
 [32mThis program comes with ABSOLUTELY NO WARRANTY; for details type [33mshow w[32m.[0m
 [32mThis is free software, and you are welcome to redistribute it[0m
 [32munder certain conditions; type [33mshow c[32m for details.[0m

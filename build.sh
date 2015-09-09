@@ -14,8 +14,8 @@ rm -rf bin pkg
 
 $ECHO Fetching deps
 go get github.com/sbinet/liner
-go get code.google.com/p/gomock/gomock
-go get code.google.com/p/gomock/mockgen
+go get github.com/golang/mock/gomock
+go get github.com/golang/mock/mockgen
 go get code.google.com/p/go.crypto/scrypt
 
 $ECHO

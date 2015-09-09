@@ -1,5 +1,5 @@
 // This file is part of Gate.
-// Copyright (C) 2012-2013 Cyril Adrian <cyril.adrian@gmail.com>
+// Copyright (C) 2012-2015 Cyril Adrian <cyril.adrian@gmail.com>
 //
 // Gate is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import (
 )
 
 import (
-	"code.google.com/p/gomock/gomock"
+	"github.com/golang/mock/gomock"
 	"io"
 	"testing"
 )
