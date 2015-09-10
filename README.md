@@ -1,7 +1,7 @@
 # General description
 
-*Gate* is a port of the infamous *pwdmgr* of mine (written in Eiffel),
-but this time written in Go.
+*Gate* is a port of *pwd* (written in Eiffel), but this time written
+in Go.
 
 The aim is to provide a very simple interface to a passwords database.
 
@@ -10,7 +10,7 @@ Normal use is through *yad*.
 An *administration console* is also provided.
 
 The technical aim is to remove a lot of the lower layers of
-unmaintained software `pwdmgr` was written with; and instead, bet on
+unmaintained software `pwd` was written with; and instead, bet on
 promising technologies.
 
 ## Features:
@@ -170,12 +170,3 @@ streams.
 
 Just take the needed steps to ensure that your machine is not remotely
 exploitable.
-
-# Installation
-
-Gate is provided as a debian package in my PPA. Follow the
-instructions below to install the package:
-
-    wget -O - http://apt.cadrian.net/public.key | sudo apt-key add -
-
-    deb http://apt.cadrian.net unstable main
