@@ -51,10 +51,9 @@ type rpcChannelServer struct {
 }
 
 type rpcChannelClient struct {
+	config	 core.Config
 	proxy  server.Server
-	host   string
-	port   int
-	wait   bool
+	startFunc server.ProxyStartFunc
 	client *rpc.Client
 }
 
@@ -162,19 +161,24 @@ func (self *rpcChannelServer) SetMaster(master string, reply *bool) error {
 
 // ----------------------------------------------------------------
 
-func RpcChannelClient(host string, port int, wait bool, proxy server.Server) ChannelClient {
+func RpcChannelClient(config core.Config, startFunc server.ProxyStartFunc, proxy server.Server) ChannelClient {
 	return &rpcChannelClient{
+		config: config,
 		proxy: proxy,
-		host:  host,
-		port:  port,
-		wait:  wait,
+		startFunc: startFunc,
 	}
 }
 
 func (self *rpcChannelClient) Connect() (err error) {
-	endpoint := fmt.Sprintf("%s:%d", self.host, self.port)
+	host, port := networkConfig(self.config)
+	endpoint := fmt.Sprintf("%s:%d", host, port)
 	client, err := rpc.DialHTTP("tcp", endpoint)
-	if self.wait {
+	if err != nil {
+		e := self.startFunc()
+		if e != nil {
+			err = errors.Decorated(e)
+			return
+		}
 		for delay := 100 * time.Millisecond; err != nil && delay <= 3*time.Second; delay *= 2 {
 			// if the server just started, maybe it needs time to settle
 			time.Sleep(delay)

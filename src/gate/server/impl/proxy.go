@@ -18,6 +18,7 @@ package impl
 // Client-side access to the server (implements all the RPC operations).
 
 import (
+	"gate/core"
 	"gate/server"
 	"gate/server/channel"
 )
@@ -28,10 +29,12 @@ type proxy struct {
 
 var _ server.Server = &proxy{}
 
+type ProxyStartFunc func() error
+
 // Return a new proxy to the Gate server identified by the host name and port.
-func Proxy(host string, port int, wait bool) (result server.Server, err error) {
+func Proxy(config core.Config, startFunc ProxyStartFunc) (result server.Server, err error) {
 	p := &proxy{}
-	p.channel = channel.RpcChannelClient(host, port, wait, p)
+	p.channel = channel.RpcChannelClient(config, startFunc, p)
 	err = p.channel.Connect()
 	if err == nil {
 		result = p

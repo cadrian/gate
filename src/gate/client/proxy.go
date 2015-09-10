@@ -31,7 +31,6 @@ import (
 	"io"
 	"os"
 	osexec "os/exec"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -164,34 +163,9 @@ func openVault(srv server.Server, config core.Config) (err error) {
 func proxy(config core.Config) (result server.Server, err error) {
 	result = _proxy
 	if result == nil {
-		var (
-			host, p string
-			port	int64
-			s	server.Server
-		)
-		host, err = config.Eval("", "connection", "host", os.Getenv)
+		s, err := serverimpl.Proxy(config, startServer)
 		if err != nil {
 			return
-		}
-		p, err = config.Eval("", "connection", "port", os.Getenv)
-		if err != nil {
-			return
-		}
-		port, err = strconv.ParseInt(p, 10, 32)
-		if err != nil {
-			err = errors.Decorated(err)
-			return
-		}
-		s, err = serverimpl.Proxy(host, int(port), false)
-		if err != nil {
-			err = startServer()
-			if err != nil {
-				return
-			}
-			s, err = serverimpl.Proxy(host, int(port), true)
-			if err != nil {
-				return
-			}
 		}
 
 		var isopen bool
