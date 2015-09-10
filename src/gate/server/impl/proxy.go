@@ -34,7 +34,7 @@ type ProxyStartFunc func() error
 // Return a new proxy to the Gate server identified by the host name and port.
 func Proxy(config core.Config, startFunc ProxyStartFunc) (result server.Server, err error) {
 	p := &proxy{}
-	p.channel = channel.RpcChannelClient(config, startFunc, p)
+	p.channel = channel.HttpChannelClient(config, startFunc, p)
 	err = p.channel.Connect()
 	if err == nil {
 		result = p

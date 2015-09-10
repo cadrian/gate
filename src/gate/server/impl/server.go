@@ -76,7 +76,7 @@ func Start(config core.Config) (result ServerLocal, err error) {
 		status:	 make(chan int),
 		running: true,
 	}
-	srv.channel = channel.RpcChannelServer(config, srv)
+	srv.channel = channel.HttpChannelServer(config, srv)
 
 	err = srv.channel.Bind()
 	if err != nil {

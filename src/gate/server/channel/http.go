@@ -43,23 +43,23 @@ func (self *blockingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.DefaultServeMux.ServeHTTP(w, r)
 }
 
-type rpcChannelServer struct {
+type httpChannelServer struct {
 	config	 core.Config
 	server	 server.Server
 	handler	 *blockingHandler
 	listener net.Listener
 }
 
-type rpcChannelClient struct {
+type httpChannelClient struct {
 	config	 core.Config
 	proxy  server.Server
 	startFunc server.ProxyStartFunc
 	client *rpc.Client
 }
 
-var _ server.Server = &rpcChannelServer{}
-var _ ChannelServer = &rpcChannelServer{}
-var _ ChannelClient = &rpcChannelClient{}
+var _ server.Server = &httpChannelServer{}
+var _ ChannelServer = &httpChannelServer{}
+var _ ChannelClient = &httpChannelClient{}
 
 func networkConfig(config core.Config) (host, port string) {
 	var e error
@@ -76,8 +76,8 @@ func networkConfig(config core.Config) (host, port string) {
 
 // ----------------------------------------------------------------
 
-func RpcChannelServer(config core.Config, server server.Server) ChannelServer {
-	return &rpcChannelServer{
+func HttpChannelServer(config core.Config, server server.Server) ChannelServer {
+	return &httpChannelServer{
 		config: config,
 		server: server,
 		handler: &blockingHandler{
@@ -86,7 +86,7 @@ func RpcChannelServer(config core.Config, server server.Server) ChannelServer {
 	}
 }
 
-func (self *rpcChannelServer) Bind() (err error) {
+func (self *httpChannelServer) Bind() (err error) {
 	rpc.RegisterName("Gate", self)
 	rpc.HandleHTTP()
 
@@ -103,43 +103,43 @@ func (self *rpcChannelServer) Bind() (err error) {
 	return
 }
 
-func (self *rpcChannelServer) Disconnect() {
+func (self *httpChannelServer) Disconnect() {
 	self.handler.lock.Lock() // will never unlock, but the server is dead anyway (this barrier ensures that all connections are served)
 }
 
-func (self *rpcChannelServer) IsOpen(thenClose bool, reply *bool) error {
+func (self *httpChannelServer) IsOpen(thenClose bool, reply *bool) error {
 	return self.server.IsOpen(thenClose, reply)
 }
 
-func (self *rpcChannelServer) Get(name string, reply *string) error {
+func (self *httpChannelServer) Get(name string, reply *string) error {
 	return self.server.Get(name, reply)
 }
 
-func (self *rpcChannelServer) List(filter string, reply *[]string) error {
+func (self *httpChannelServer) List(filter string, reply *[]string) error {
 	return self.server.List(filter, reply)
 }
 
-func (self *rpcChannelServer) Open(master string, reply *bool) error {
+func (self *httpChannelServer) Open(master string, reply *bool) error {
 	return self.server.Open(master, reply)
 }
 
-func (self *rpcChannelServer) Merge(args server.MergeArgs, reply *bool) error {
+func (self *httpChannelServer) Merge(args server.MergeArgs, reply *bool) error {
 	return self.server.Merge(args, reply)
 }
 
-func (self *rpcChannelServer) Save(force bool, reply *bool) error {
+func (self *httpChannelServer) Save(force bool, reply *bool) error {
 	return self.server.Save(force, reply)
 }
 
-func (self *rpcChannelServer) Set(args server.SetArgs, reply *string) error {
+func (self *httpChannelServer) Set(args server.SetArgs, reply *string) error {
 	return self.server.Set(args, reply)
 }
 
-func (self *rpcChannelServer) Unset(key string, reply *bool) error {
+func (self *httpChannelServer) Unset(key string, reply *bool) error {
 	return self.server.Unset(key, reply)
 }
 
-func (self *rpcChannelServer) Stop(status int, reply *bool) (err error) {
+func (self *httpChannelServer) Stop(status int, reply *bool) (err error) {
 	err = self.server.Stop(status, reply)
 	if err != nil {
 		return
@@ -151,25 +151,25 @@ func (self *rpcChannelServer) Stop(status int, reply *bool) (err error) {
 	return
 }
 
-func (self *rpcChannelServer) Ping(info string, reply *string) error {
+func (self *httpChannelServer) Ping(info string, reply *string) error {
 	return self.server.Ping(info, reply)
 }
 
-func (self *rpcChannelServer) SetMaster(master string, reply *bool) error {
+func (self *httpChannelServer) SetMaster(master string, reply *bool) error {
 	return self.server.SetMaster(master, reply)
 }
 
 // ----------------------------------------------------------------
 
-func RpcChannelClient(config core.Config, startFunc server.ProxyStartFunc, proxy server.Server) ChannelClient {
-	return &rpcChannelClient{
+func HttpChannelClient(config core.Config, startFunc server.ProxyStartFunc, proxy server.Server) ChannelClient {
+	return &httpChannelClient{
 		config: config,
 		proxy: proxy,
 		startFunc: startFunc,
 	}
 }
 
-func (self *rpcChannelClient) Connect() (err error) {
+func (self *httpChannelClient) Connect() (err error) {
 	host, port := networkConfig(self.config)
 	endpoint := fmt.Sprintf("%s:%d", host, port)
 	client, err := rpc.DialHTTP("tcp", endpoint)
@@ -194,10 +194,10 @@ func (self *rpcChannelClient) Connect() (err error) {
 	return
 }
 
-func (self *rpcChannelClient) Disconnect() {
+func (self *httpChannelClient) Disconnect() {
 }
 
-func (self *rpcChannelClient) IsOpen(thenClose bool, reply *bool) (err error) {
+func (self *httpChannelClient) IsOpen(thenClose bool, reply *bool) (err error) {
 	err = self.client.Call("Gate.IsOpen", thenClose, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -205,7 +205,7 @@ func (self *rpcChannelClient) IsOpen(thenClose bool, reply *bool) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) Get(name string, reply *string) (err error) {
+func (self *httpChannelClient) Get(name string, reply *string) (err error) {
 	err = self.client.Call("Gate.Get", name, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -213,7 +213,7 @@ func (self *rpcChannelClient) Get(name string, reply *string) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) List(filter string, reply *[]string) (err error) {
+func (self *httpChannelClient) List(filter string, reply *[]string) (err error) {
 	err = self.client.Call("Gate.List", filter, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -221,7 +221,7 @@ func (self *rpcChannelClient) List(filter string, reply *[]string) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) Open(master string, reply *bool) (err error) {
+func (self *httpChannelClient) Open(master string, reply *bool) (err error) {
 	err = self.client.Call("Gate.Open", master, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -229,7 +229,7 @@ func (self *rpcChannelClient) Open(master string, reply *bool) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) Merge(args server.MergeArgs, reply *bool) (err error) {
+func (self *httpChannelClient) Merge(args server.MergeArgs, reply *bool) (err error) {
 	err = self.client.Call("Gate.Merge", args, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -237,7 +237,7 @@ func (self *rpcChannelClient) Merge(args server.MergeArgs, reply *bool) (err err
 	return
 }
 
-func (self *rpcChannelClient) Save(force bool, reply *bool) (err error) {
+func (self *httpChannelClient) Save(force bool, reply *bool) (err error) {
 	err = self.client.Call("Gate.Save", force, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -245,7 +245,7 @@ func (self *rpcChannelClient) Save(force bool, reply *bool) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) Set(args server.SetArgs, reply *string) (err error) {
+func (self *httpChannelClient) Set(args server.SetArgs, reply *string) (err error) {
 	err = self.client.Call("Gate.Set", args, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -253,7 +253,7 @@ func (self *rpcChannelClient) Set(args server.SetArgs, reply *string) (err error
 	return
 }
 
-func (self *rpcChannelClient) Unset(key string, reply *bool) (err error) {
+func (self *httpChannelClient) Unset(key string, reply *bool) (err error) {
 	err = self.client.Call("Gate.Unset", key, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -261,7 +261,7 @@ func (self *rpcChannelClient) Unset(key string, reply *bool) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) Stop(status int, reply *bool) (err error) {
+func (self *httpChannelClient) Stop(status int, reply *bool) (err error) {
 	err = self.client.Call("Gate.Stop", status, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -269,7 +269,7 @@ func (self *rpcChannelClient) Stop(status int, reply *bool) (err error) {
 	return
 }
 
-func (self *rpcChannelClient) SetMaster(master string, reply *bool) (err error) {
+func (self *httpChannelClient) SetMaster(master string, reply *bool) (err error) {
 	err = self.client.Call("Gate.SetMaster", master, reply)
 	if err != nil {
 		err = errors.Decorated(err)
@@ -277,7 +277,7 @@ func (self *rpcChannelClient) SetMaster(master string, reply *bool) (err error) 
 	return
 }
 
-func (self *rpcChannelClient) Ping(info string, reply *string) (err error) {
+func (self *httpChannelClient) Ping(info string, reply *string) (err error) {
 	err = self.client.Call("Gate.Ping", info, reply)
 	if err != nil {
 		err = errors.Decorated(err)
